@@ -1,0 +1,209 @@
+<%- include('../components/template') %>
+<div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-900 to-gray-800">
+  <div class="text-center p-8 max-w-md mx-4 bg-gray-800/80 backdrop-blur-sm rounded-xl shadow-2xl border border-gray-700/50">
+    <!-- Animated Logo/Icon -->
+    <div class="flex justify-center mb-6">
+      <svg class="w-16 h-16 text-blue-400 animate-pulse" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+      </svg>
+    </div>
+
+    <h1 class="text-3xl font-bold text-white mb-3">Server Setup</h1>
+    <p class="text-gray-300 mb-6">We're preparing your server environment. Please wait...</p>
+    
+    <!-- Enhanced Progress Indicator -->
+    <div class="mb-8">
+      <div class="flex justify-between text-sm text-gray-400 mb-1">
+        <span>Initializing</span>
+        <span id="progress-text">0%</span>
+      </div>
+      <div class="w-full bg-gray-700 rounded-full h-2.5">
+        <div id="progress-bar" class="bg-gradient-to-r from-blue-500 to-purple-600 h-2.5 rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+      </div>
+      <div class="text-xs text-gray-500 mt-2" id="status-message">Checking system requirements...</div>
+    </div>
+
+    <!-- Animated Loader with Countdown -->
+    <div class="flex flex-col items-center mb-6">
+      <div class="relative w-14 h-14 mb-3">
+        <div class="absolute inset-0 border-4 border-blue-500/30 rounded-full"></div>
+        <div class="absolute inset-0 border-4 border-transparent border-t-blue-400 rounded-full animate-spin"></div>
+        <div class="flex items-center justify-center w-full h-full text-xs font-medium text-blue-400" id="countdown">5s</div>
+      </div>
+      <p class="text-sm text-gray-400">Estimated time remaining</p>
+    </div>
+
+    <!-- Status Cards -->
+    <div class="grid grid-cols-2 gap-3 mb-6">
+      <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-600/30">
+        <div class="text-blue-400 text-sm font-medium">Memory</div>
+        <div class="text-white text-xs" id="memory-status">Allocating...</div>
+      </div>
+      <div class="bg-gray-700/50 p-3 rounded-lg border border-gray-600/30">
+        <div class="text-purple-400 text-sm font-medium">Storage</div>
+        <div class="text-white text-xs" id="storage-status">Preparing...</div>
+      </div>
+    </div>
+
+    <!-- Error State (Hidden by default) -->
+    <div id="error-message" class="hidden p-4 mb-6 bg-red-900/30 border border-red-700/50 rounded-lg">
+      <div class="flex items-center justify-center text-red-400 mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+        <span class="font-medium">Installation Failed</span>
+      </div>
+      <p class="text-red-300 text-sm mb-3" id="error-detail">Unable to complete server setup</p>
+      <button onclick="retryInstallation()" class="w-full py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+        </svg>
+        Retry Installation
+      </button>
+    </div>
+
+    <!-- Help Section -->
+    <div class="text-xs text-gray-500 mt-6">
+      Need help? <a href="#" class="text-blue-400 hover:text-blue-300 transition">Contact support</a>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+<script>
+  // DOM Elements
+  const progressBar = document.getElementById('progress-bar');
+  const progressText = document.getElementById('progress-text');
+  const statusMessage = document.getElementById('status-message');
+  const errorMessage = document.getElementById('error-message');
+  const errorDetail = document.getElementById('error-detail');
+  const countdown = document.getElementById('countdown');
+  const memoryStatus = document.getElementById('memory-status');
+  const storageStatus = document.getElementById('storage-status');
+
+  // State variables
+  let checkInterval;
+  let countdownInterval;
+  let secondsRemaining = 30;
+  const instanceId = '<%= req.params.id %>';
+
+  // Status messages for different progress ranges
+  const statusMessages = [
+    { min: 0, max: 20, message: "Checking system requirements..." },
+    { min: 21, max: 40, message: "Allocating resources..." },
+    { min: 41, max: 60, message: "Installing dependencies..." },
+    { min: 61, max: 80, message: "Configuring environment..." },
+    { min: 81, max: 95, message: "Finalizing setup..." },
+    { min: 96, max: 100, message: "Almost done!" }
+  ];
+
+  // Initialize countdown
+  function startCountdown() {
+    updateCountdownDisplay();
+    countdownInterval = setInterval(() => {
+      secondsRemaining--;
+      updateCountdownDisplay();
+      if (secondsRemaining <= 0) {
+        clearInterval(countdownInterval);
+      }
+    }, 1000);
+  }
+
+  function updateCountdownDisplay() {
+    countdown.textContent = `${secondsRemaining}s`;
+  }
+
+  // Update progress display
+  function updateProgress(percent, stateData = {}) {
+    const progress = Math.min(100, Math.max(0, percent));
+    progressBar.style.width = `${progress}%`;
+    progressText.textContent = `${progress}%`;
+    
+    // Update status message based on progress
+    const status = statusMessages.find(s => progress >= s.min && progress <= s.max);
+    if (status) statusMessage.textContent = status.message;
+
+    // Update resource status if available
+    if (stateData.memory) {
+      memoryStatus.textContent = `${stateData.memory.allocated}MB / ${stateData.memory.total}MB`;
+    }
+    if (stateData.storage) {
+      storageStatus.textContent = `${stateData.storage.used}GB / ${stateData.storage.total}GB`;
+    }
+  }
+
+  // Show error state
+  function showError(error) {
+    clearInterval(checkInterval);
+    clearInterval(countdownInterval);
+    document.querySelector('.animate-spin').classList.add('hidden');
+    errorDetail.textContent = error.message || "Unable to complete server setup";
+    errorMessage.classList.remove('hidden');
+  }
+
+  // Retry installation
+  async function retryInstallation() {
+    try {
+      errorMessage.classList.add('hidden');
+      document.querySelector('.animate-spin').classList.remove('hidden');
+      updateProgress(0);
+      secondsRemaining = 30;
+      startCountdown();
+      
+      const response = await axios.post(`/instance/${instanceId}/retry-installation`);
+      if (response.data.success) {
+        checkInterval = setInterval(fetchState, 2500);
+      } else {
+        showError({ message: response.data.error || "Failed to restart installation" });
+      }
+    } catch (error) {
+      showError(error);
+    }
+  }
+
+  // Fetch server state
+  async function fetchState() {
+    try {
+      const response = await axios.get(`/instance/${instanceId}/installing/status`, {
+        timeout: 8000,
+        validateStatus: (status) => status < 500
+      });
+
+      const { state, progress, error, ...stateData } = response.data;
+
+      if (progress !== undefined) {
+        updateProgress(progress, stateData);
+      }
+
+      if (state === 'READY') {
+        clearIntervals();
+        // Add a slight delay for visual feedback before redirect
+        setTimeout(() => {
+          window.location.href = `/instance/${instanceId}`;
+        }, 800);
+      } else if (state === 'FAILED') {
+        showError({ message: error || "Installation process failed" });
+      }
+    } catch (error) {
+      console.error('Error fetching state:', error);
+      // Continue checking on network errors
+    }
+  }
+
+  // Clean up intervals
+  function clearIntervals() {
+    clearInterval(checkInterval);
+    clearInterval(countdownInterval);
+  }
+
+  // Initialize
+  document.addEventListener('DOMContentLoaded', () => {
+    startCountdown();
+    fetchState();
+    checkInterval = setInterval(fetchState, 2500);
+  });
+
+  // Clean up when leaving the page
+  window.addEventListener('beforeunload', clearIntervals);
+</script>
+<%- include('../components/footer') %>

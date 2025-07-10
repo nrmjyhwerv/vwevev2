@@ -1,0 +1,13 @@
+{
+  "baseUri": "http://localhost:3000",
+  "port": 3000,
+  "session_secret": "0\u0013ãì'>tÚ`iî«9Ëÿ",
+  "domain": "localhost",
+  "mode": "production",
+  "version": "3.0",
+  "note": "you can also use Mysql if you put mysql://user:pass@localhost:3306/dbname into databaseURL!",
+  "databaseURL": "sqlite://skyport.db",
+  "databaseTable": "skyport",
+  "ogTitle": "CryptalisPanel",
+  "ogDescription": "This is an instance of the Cryptalis Panel"
+}

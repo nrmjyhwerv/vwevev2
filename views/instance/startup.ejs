@@ -1,0 +1,580 @@
+<%- include('../components/template') %>
+
+<style>
+    /* Improved modal styling with better mobile support */
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.3s ease, visibility 0.3s ease;
+        z-index: 1000;
+        padding: 1rem;
+    }
+
+    .modal-overlay.active {
+        opacity: 1;
+        visibility: visible;
+    }
+    
+    .modal-content {
+        width: 100%;
+        max-width: 420px;
+        background: #1e2125;
+        border-radius: 1rem;
+        padding: 1.5rem;
+        transform: scale(0.95);
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        opacity: 0;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+    }
+    
+    .modal-overlay.active .modal-content {
+        transform: scale(1);
+        opacity: 1;
+    }
+    
+    /* Improved mobile layout */
+    @media (max-width: 640px) {
+        .flex-col-mobile {
+            flex-direction: column;
+        }
+        
+        .w-full-mobile {
+            width: 100%;
+        }
+        
+        .space-x-4.flex-col-mobile > * + * {
+            margin-left: 0;
+            margin-top: 1rem;
+        }
+        
+        .px-6 {
+            padding-left: 1rem;
+            padding-right: 1rem;
+        }
+        
+        .p-6 {
+            padding: 1rem;
+        }
+        
+        .text-lg {
+            font-size: 1.125rem;
+        }
+    }
+    
+    /* Better touch targets for mobile */
+    button, input, .edit-variable {
+        min-height: 44px; /* Recommended minimum touch target size */
+    }
+    
+    /* Improved input styling */
+    .input-field {
+        width: 100%;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 0.75rem;
+        color: white;
+        font-size: 0.9375rem;
+        transition: all 0.2s ease;
+    }
+    
+    .input-field:focus {
+        outline: none;
+        border-color: #6366f1;
+        box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+    }
+    
+    /* Better button styling */
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0.75rem 1.5rem;
+        border-radius: 0.75rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        cursor: pointer;
+        border: none;
+        white-space: nowrap;
+    }
+    
+    .btn-primary {
+        background: #6366f1;
+        color: white;
+    }
+    
+    .btn-primary:hover {
+        background: #4f46e5;
+        transform: translateY(-1px);
+    }
+    
+    .btn-primary:active {
+        transform: translateY(0);
+    }
+    
+    .btn-warning {
+        background: #f59e0b;
+        color: white;
+    }
+    
+    .btn-warning:hover {
+        background: #d97706;
+    }
+    
+    .btn-secondary {
+        background: #3f4145;
+        color: white;
+    }
+    
+    .btn-secondary:hover {
+        background: #4b4d52;
+    }
+    
+    /* Card styling */
+    .card {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 1rem;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+    }
+    
+    .card-header {
+        padding: 1rem 1.5rem;
+        background: rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    /* Warning alert styling */
+    .alert-warning {
+        background: rgba(245, 158, 11, 0.1);
+        border: 1px solid rgba(245, 158, 11, 0.2);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        display: flex;
+        gap: 0.75rem;
+    }
+    
+    /* Variable list styling */
+    .variable-item {
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 0.75rem;
+        margin-bottom: 1rem;
+    }
+    
+    .variable-value {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 0.5rem 0.75rem;
+        border-radius: 0.5rem;
+        font-family: monospace;
+        font-size: 0.875rem;
+        word-break: break-all;
+    }
+    
+    /* JSON display styling */
+    .json-display {
+        background: rgba(0, 0, 0, 0.3);
+        padding: 1rem;
+        border-radius: 0.75rem;
+        font-family: monospace;
+        font-size: 0.875rem;
+        white-space: pre-wrap;
+        word-break: break-all;
+    }
+</style>
+
+<main id="content" class="pb-20">
+    <%- include('../components/instance') %>
+    
+    <!-- Rename Server Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="text-lg font-semibold text-white">Rename Server</h2>
+        </div>
+        <div class="card-body">
+            <div class="flex space-x-4 flex-col-mobile">
+                <input 
+                    type="text" 
+                    id="nameServer" 
+                    class="input-field flex-1 w-full-mobile" 
+                    placeholder="<%= instance.Name %>"
+                    aria-label="Server name"
+                >
+                <button 
+                    id="saveName" 
+                    class="btn btn-primary w-full-mobile"
+                    aria-label="Save server name"
+                >
+                    <span>Rename</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Server Reinstall Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="text-lg font-semibold text-white">Reinstall Server</h2>
+        </div>
+        <div class="card-body space-y-4">
+            <div class="alert-warning">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-6 w-6 text-amber-400 flex-shrink-0">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
+                </svg>
+                <div>
+                    <h3 class="text-md font-medium text-amber-400">Warning</h3>
+                    <p class="mt-1 text-gray-300 text-sm">This action will completely reset your server to its default state. All files, databases, and configurations will be permanently deleted.</p>
+                </div>
+            </div>
+            <div class="flex justify-end">
+                <button 
+                    onclick="reinstall()" 
+                    class="btn btn-warning"
+                    aria-label="Reinstall server"
+                >
+                    <span>Reinstall</span>
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Server Information Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="text-lg font-semibold text-white">Server Information</h2>
+        </div>
+        <div class="card-body">
+            <div class="json-display">
+                { 
+                    "Name": "<%= instance.Name %>",
+                    "Id": "<%= instance.Id %>",
+                    "IP": "<%= instance.Node.address %>:<%= instance.Primary %>",
+                    "Image": "<%= instance.Image %>",
+                    "ContainerId": "<%= instance.ContainerId %>"
+                }
+            </div>
+        </div>
+    </div>
+    
+    <!-- Advanced Settings Card -->
+    <div class="card">
+        <div class="card-header">
+            <h2 class="text-lg font-semibold text-white">Advanced Settings</h2>
+        </div>
+        <div class="card-body">
+            <div id="variables-list" class="space-y-4">
+                <% 
+                    const envObject = {};
+                    if (instance.Env) {
+                        instance.Env.forEach(function(item) {
+                            const [key, value] = item.split('=');
+                            envObject[key] = value;
+                        });
+                    }
+                %>
+                
+                <% if (instance.imageData && instance.imageData.Variables) { %>
+                    <% Object.keys(instance.imageData.Variables).forEach(function(variableName) { %>
+                        <% const variable = instance.imageData.Variables[variableName]; %>
+                        <div class="variable-item">
+                            <div class="flex justify-between items-center mb-2">
+                                <div>
+                                    <h3 class="text-lg font-semibold"><%= variableName %></h3>
+                                    <% if (variable.description) { %>
+                                        <p class="text-sm text-gray-400 mt-1"><%= variable.description %></p>
+                                    <% } %>
+                                </div>
+                                <button 
+                                    class="btn btn-secondary edit-variable" 
+                                    data-variable-name="<%= variableName %>" 
+                                    data-variable-value="<%= envObject[variableName] || '' %>"
+                                    aria-label="Edit variable <%= variableName %>"
+                                >
+                                    Edit
+                                </button>
+                            </div>
+                            <div>
+                                <span class="text-sm font-medium text-gray-400">Current Value:</span>
+                                <span class="variable-value text-sm ml-2"><%= envObject[variableName] || 'Not set' %></span>
+                            </div>
+                        </div>
+                    <% }); %>
+                <% } else { %>
+                    <div class="text-center py-8 text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <p class="text-lg font-medium">No Variables Found</p>
+                        <p class="text-sm mt-1">This server image doesn't have any configurable variables.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Edit Variable Modal -->
+<div id="edit-variable-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 class="text-xl font-semibold mb-4 text-center" id="modal-title">Edit Variable</h3>
+        <input 
+            type="text" 
+            id="variable-value" 
+            class="input-field w-full mb-6" 
+            placeholder="Enter value"
+            aria-label="Variable value"
+        >
+        <div class="flex justify-center gap-4">
+            <button 
+                onclick="closeModal('edit-variable-modal')" 
+                class="btn btn-secondary"
+                aria-label="Cancel editing"
+            >
+                Cancel
+            </button>
+            <button 
+                id="save-variable" 
+                class="btn btn-primary"
+                aria-label="Save changes"
+            >
+                Save Changes
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmation-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h3 class="text-xl font-semibold mb-2 text-center" id="modal-title"></h3>
+        <p class="text-gray-300 mb-6 text-center" id="modal-message"></p>
+        <div class="flex justify-center gap-4">
+            <button 
+                id="modal-cancel" 
+                class="btn btn-secondary"
+                aria-label="Cancel action"
+            >
+                Cancel
+            </button>
+            <button 
+                id="modal-confirm" 
+                class="btn btn-warning"
+                aria-label="Confirm action"
+            >
+                Confirm
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Improved modal handling
+    function openEditModal(variableName, currentValue) {
+        const modal = document.getElementById('edit-variable-modal');
+        const valueInput = document.getElementById('variable-value');
+        const modalTitle = document.getElementById('modal-title');
+
+        modalTitle.textContent = `Edit ${variableName}`;
+        valueInput.value = currentValue;
+        valueInput.focus();
+        
+        // Set placeholder based on variable name
+        valueInput.placeholder = `Enter value for ${variableName}`;
+
+        modal.classList.add('active');
+
+        // Update the Save button's action
+        const saveBtn = document.getElementById('save-variable');
+        saveBtn.onclick = function() {
+            saveVariable(variableName, valueInput.value);
+        };
+    }
+
+    function closeModal(modalId) {
+        document.getElementById(modalId).classList.remove('active');
+    }
+
+    // Close modals when clicking outside
+    document.querySelectorAll('.modal-overlay').forEach(modal => {
+        modal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('active');
+            }
+        });
+    });
+
+    // Save variable function
+    async function saveVariable(variableName, value) {
+        const userId = '<%= req.user.userId %>';
+        const instanceId = '<%= instance.Id %>';
+        
+        try {
+            const response = await fetch(`/instances/startup/changevariable/${instanceId}?variable=${encodeURIComponent(variableName)}&value=${encodeURIComponent(value)}&user=${encodeURIComponent(userId)}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                closeModal('edit-variable-modal');
+                // Show success feedback
+                showToast('Variable updated successfully');
+                // Refresh the page after a short delay
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                showToast('Failed to update variable', 'error');
+            }
+        } catch (error) {
+            console.error('Error updating variable:', error);
+            showToast('An error occurred', 'error');
+        }
+    }
+
+    // Rename server handler
+    document.getElementById('saveName').addEventListener('click', function() {
+        const name = document.getElementById('nameServer').value.trim();
+        if (name) {
+            window.location.href = '/instance/<%= req.params.id %>/change/name/' + encodeURIComponent(name);
+        } else {
+            showToast('Please enter a server name', 'warning');
+        }
+    });
+
+    // Reinstall confirmation
+    async function reinstall() {
+        const instanceId = '<%= req.params.id %>';
+        
+        showConfirmationModal(
+            'Reinstall Server',
+            'Are you sure you want to reinstall the server? This will permanently delete all data and cannot be undone.',
+            async function() {
+                try {
+                    showToast('Reinstalling server...', 'info');
+                    
+                    const response = await fetch(`/instance/reinstall/${instanceId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
+
+                    if (response.ok) {
+                        showToast('Server reinstalled successfully!', 'success');
+                        setTimeout(() => {
+                            window.location.href = `/instance/${instanceId}/settings`;
+                        }, 2000);
+                    } else {
+                        const error = await response.text();
+                        showToast('Error: ' + error, 'error');
+                    }
+                } catch (error) {
+                    console.error('Reinstall error:', error);
+                    showToast('Failed to reinstall server', 'error');
+                }
+            }
+        );
+    }
+
+    // Improved confirmation modal
+    function showConfirmationModal(title, message, onConfirm) {
+        const modal = document.getElementById('confirmation-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalMessage = document.getElementById('modal-message');
+        const confirmButton = document.getElementById('modal-confirm');
+        const cancelButton = document.getElementById('modal-cancel');
+
+        modalTitle.textContent = title;
+        modalMessage.textContent = message;
+        modal.classList.add('active');
+
+        // Set up event listeners
+        const confirmHandler = () => {
+            onConfirm();
+            modal.classList.remove('active');
+            // Remove the event listener after use
+            confirmButton.removeEventListener('click', confirmHandler);
+        };
+        
+        const cancelHandler = () => {
+            modal.classList.remove('active');
+            // Remove the event listener after use
+            cancelButton.removeEventListener('click', cancelHandler);
+        };
+
+        confirmButton.addEventListener('click', confirmHandler);
+        cancelButton.addEventListener('click', cancelHandler);
+    }
+
+    // Toast notification function
+    function showToast(message, type = 'success') {
+        // Remove existing toast if any
+        const existingToast = document.getElementById('global-toast');
+        if (existingToast) existingToast.remove();
+        
+        const toast = document.createElement('div');
+        toast.id = 'global-toast';
+        toast.className = `fixed bottom-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-lg shadow-lg text-white font-medium flex items-center space-x-2 z-50 transition-all duration-300 ${
+            type === 'success' ? 'bg-green-500' : 
+            type === 'error' ? 'bg-red-500' : 
+            type === 'warning' ? 'bg-amber-500' : 'bg-blue-500'
+        }`;
+        toast.innerHTML = `
+            <span>${message}</span>
+        `;
+        toast.style.opacity = '0';
+        toast.style.transform = 'translate(-50%, 20px)';
+        
+        document.body.appendChild(toast);
+        
+        // Animate in
+        setTimeout(() => {
+            toast.style.opacity = '1';
+            toast.style.transform = 'translate(-50%, 0)';
+        }, 10);
+        
+        // Auto-remove after 3 seconds
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translate(-50%, 20px)';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    // Add event listeners to all "Edit" buttons
+    document.querySelectorAll('.edit-variable').forEach(button => {
+        button.addEventListener('click', function() {
+            const variableName = this.getAttribute('data-variable-name');
+            const variableValue = this.getAttribute('data-variable-value');
+            openEditModal(variableName, variableValue);
+        });
+    });
+    
+    // Add keyboard support for modals
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.modal-overlay.active').forEach(modal => {
+                modal.classList.remove('active');
+            });
+        }
+    });
+</script>
+    
+<%- include('../components/footer') %>

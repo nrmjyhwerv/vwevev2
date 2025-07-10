@@ -1,0 +1,889 @@
+<%- include('../components/template') %>
+<main id="content" class="min-h-screen text-white bg-gradient-to-br from-gray-900 to-gray-800">
+   <div class="container mx-auto px-4 py-6">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+         <div>
+            <h1 class="text-2xl font-bold">Automation Workflow</h1>
+            <p class="text-gray-400">Design and manage your instance automation workflow</p>
+         </div>
+         <% let query = req.query.path ? '?path=' + req.query.path : ''; %>
+         <div class="flex flex-wrap gap-3">
+            <button id="save-button" type="button" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-700 transition-colors shadow-md">
+               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path>
+               </svg>
+               Save Workflow
+            </button>
+            <button id="help-button" type="button" class="flex items-center gap-2 px-4 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 transition-colors">
+               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+               </svg>
+               Help
+            </button>
+         </div>
+      </div>
+
+      <%- include('../components/instance') %>
+
+      <div class="flex flex-col lg:flex-row gap-6 mt-6">
+         <!-- Action Blocks Panel - Collapsible on mobile -->
+         <div class="lg:w-64">
+            <div class="bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-xl border border-gray-700/50 overflow-hidden">
+               <div class="flex items-center justify-between p-4 border-b border-gray-700/50">
+                  <h3 class="text-lg font-semibold">Actions</h3>
+                  <button id="toggle-actions" class="lg:hidden text-gray-400 hover:text-white">
+                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                     </svg>
+                  </button>
+               </div>
+               <div id="action-blocks" class="p-4 space-y-3 transition-all duration-300">
+                  <div class="action-block p-3 rounded-lg bg-indigo-600/80 hover:bg-indigo-600 cursor-grab active:cursor-grabbing shadow-md transition-all hover:shadow-lg" draggable="true" data-type="interval">
+                     <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span class="font-medium">Interval</span>
+                     </div>
+                     <select class="interval-select mt-2 w-full bg-indigo-700/70 border border-indigo-500/50 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-indigo-400 focus:border-transparent">
+                        <option value="0.5">Every 30 Minutes</option>
+                        <option value="1">1 Hour</option>
+                        <option value="2">2 Hours</option>
+                        <option value="3">3 Hours</option>
+                        <option value="4">4 Hours</option>
+                        <option value="5">5 Hours</option>
+                        <option value="7">7 Hours</option>
+                        <option value="9">9 Hours</option>
+                        <option value="13">13 Hours</option>
+                        <option value="15">15 Hours</option>
+                        <option value="17">17 Hours</option>
+                        <option value="24">Every Day</option>
+                        <option value="48">Every 2 Days</option>
+                        <option value="72">Every 3 Days</option>
+                        <option value="96">Every 4 Days</option>
+                        <option value="120">Every 5 Days</option>
+                        <option value="144">Every 6 Days</option>
+                        <option value="168">Every Week</option>
+                     </select>
+                  </div>
+
+                  <div class="action-block p-3 rounded-lg bg-green-600/80 hover:bg-green-600 cursor-grab active:cursor-grabbing shadow-md transition-all hover:shadow-lg" draggable="true" data-type="power">
+                     <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                        <span class="font-medium">Power Action</span>
+                     </div>
+                     <select class="power-action-select mt-2 w-full bg-green-700/70 border border-green-500/50 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-green-400 focus:border-transparent">
+                        <option value="start">Start</option>
+                        <option value="stop">Stop</option>
+                        <option value="restart">Restart</option>
+                     </select>
+                  </div>
+
+                  <div class="action-block p-3 rounded-lg bg-purple-600/80 hover:bg-purple-600 cursor-grab active:cursor-grabbing shadow-md transition-all hover:shadow-lg" draggable="true" data-type="webhook">
+                     <div class="flex items-center gap-2">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path>
+                        </svg>
+                        <span class="font-medium">Webhook</span>
+                     </div>
+                     <input type="text" placeholder="Enter webhook URL" class="webhook-input mt-2 w-full bg-purple-700/70 border border-purple-500/50 rounded-md px-2 py-1 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent">
+                  </div>
+               </div>
+            </div>
+         </div>
+
+         <!-- Workspace Area -->
+         <div class="flex-1">
+            <div id="workspace" class="relative h-[600px] bg-gray-800/30 border-2 border-dashed border-gray-700/50 rounded-xl shadow-lg overflow-hidden">
+               <div id="workspace-background" class="absolute inset-0 opacity-30" style="
+                  background-image: radial-gradient(circle, rgba(255,255,255,0.15) 1px, transparent 1px);
+                  background-size: 30px 30px;
+               "></div>
+
+               <div id="workspace-header" class="absolute top-0 left-0 right-0 p-3 bg-gray-800/70 backdrop-blur-sm z-10 border-b border-gray-700/50 flex justify-between items-center">
+                  <h3 class="text-lg font-medium">Workflow Canvas</h3>
+                  <div class="flex gap-2">
+                     <button id="zoom-in" class="p-1 rounded-md hover:bg-gray-700/50 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 10v4m0-4H6m4 0h4"></path>
+                        </svg>
+                     </button>
+                     <button id="zoom-out" class="p-1 rounded-md hover:bg-gray-700/50 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 10v4m0-4H6"></path>
+                        </svg>
+                     </button>
+                     <button id="center-view" class="p-1 rounded-md hover:bg-gray-700/50 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                        </svg>
+                     </button>
+                  </div>
+               </div>
+
+               <div id="workspace-content" class="absolute inset-0 overflow-auto p-6 pt-16">
+                  <p id="workspace-placeholder" class="text-center text-gray-500 mt-20">Drag actions here to build your automation workflow<br>
+                  <span class="text-sm">Tip: Right-click on elements to delete them</span></p>
+                  <svg id="connectors" class="absolute inset-0 pointer-events-none" style="z-index: 5;"></svg>
+               </div>
+            </div>
+         </div>
+      </div>
+   </div>
+</main>
+<%- include('../components/footer') %>
+
+<style>
+   /* Improved block styling */
+   .block-item {
+      position: absolute;
+      width: 220px;
+      min-height: 80px;
+      background: rgba(31, 41, 55, 0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 12px;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 10;
+      transition: transform 0.2s, box-shadow 0.2s;
+      padding: 12px;
+   }
+
+   .block-item:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+   }
+
+   .block-item[data-type="interval"] {
+      border-left: 4px solid #818cf8;
+   }
+
+   .block-item[data-type="power"] {
+      border-left: 4px solid #4ade80;
+   }
+
+   .block-item[data-type="webhook"] {
+      border-left: 4px solid #a78bfa;
+   }
+
+   /* Connection points */
+   .connection-point {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background-color: #6366f1;
+      position: absolute;
+      cursor: crosshair;
+      border: 2px solid rgba(255, 255, 255, 0.9);
+      z-index: 20;
+      transition: all 0.2s;
+      top: 50%;
+      transform: translateY(-50%);
+   }
+
+   .connection-point:hover {
+      transform: translateY(-50%) scale(1.2);
+      background-color: #4f46e5;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+   }
+
+   .connection-point[data-position="left"] {
+      left: -7px;
+   }
+
+   .connection-point[data-position="right"] {
+      right: -7px;
+   }
+
+   /* Connector lines */
+   .connector {
+      stroke: #6366f1;
+      stroke-width: 3;
+      fill: none;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+   }
+
+   .connector:hover {
+      stroke: #4f46e5;
+      stroke-width: 4;
+   }
+
+   /* Context menu */
+   #context-menu {
+      position: fixed;
+      background: rgba(31, 41, 55, 0.95);
+      backdrop-filter: blur(10px);
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      z-index: 100;
+      min-width: 160px;
+      overflow: hidden;
+   }
+
+   .context-menu-item {
+      padding: 8px 16px;
+      cursor: pointer;
+      transition: background 0.2s;
+      font-size: 14px;
+   }
+
+   .context-menu-item:hover {
+      background: rgba(55, 65, 81, 0.8);
+   }
+
+   .context-menu-item.delete {
+      color: #ef4444;
+   }
+
+   /* Mobile optimizations */
+   @media (max-width: 768px) {
+      #action-blocks {
+         max-height: 0;
+         overflow: hidden;
+      }
+
+      #action-blocks.expanded {
+         max-height: 500px;
+         padding: 1rem;
+      }
+
+      .block-item {
+         width: 180px;
+         font-size: 14px;
+      }
+
+      #workspace {
+         height: 400px;
+      }
+   }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // State management
+    const state = {
+        draggedElement: null,
+        offset: { x: 0, y: 0 },
+        currentConnection: null,
+        connections: [],
+        blockIdCounter: 0,
+        zoomLevel: 1,
+        panOffset: { x: 0, y: 0 },
+        isPanning: false,
+        startPanPosition: { x: 0, y: 0 }
+    };
+
+    // DOM elements
+    const elements = {
+        actions: document.getElementById('action-blocks'),
+        workspace: document.getElementById('workspace'),
+        workspaceContent: document.getElementById('workspace-content'),
+        connectors: document.getElementById('connectors'),
+        saveButton: document.getElementById('save-button'),
+        helpButton: document.getElementById('help-button'),
+        placeholder: document.getElementById('workspace-placeholder'),
+        toggleActions: document.getElementById('toggle-actions'),
+        zoomIn: document.getElementById('zoom-in'),
+        zoomOut: document.getElementById('zoom-out'),
+        centerView: document.getElementById('center-view')
+    };
+
+    // Load saved workflow if exists
+    const savedWorkflow = <%- JSON.stringify(workflow) %>;
+    if (savedWorkflow) {
+        loadSavedWorkflow(savedWorkflow);
+    }
+
+    // Event listeners
+    setupEventListeners();
+
+    function setupEventListeners() {
+        // Action blocks panel toggle for mobile
+        elements.toggleActions.addEventListener('click', toggleActionsPanel);
+
+        // Zoom controls
+        elements.zoomIn.addEventListener('click', () => adjustZoom(0.1));
+        elements.zoomOut.addEventListener('click', () => adjustZoom(-0.1));
+        elements.centerView.addEventListener('click', centerCanvas);
+
+        // Drag and drop
+        elements.actions.addEventListener('dragstart', dragStart);
+        elements.workspaceContent.addEventListener('dragover', dragOver);
+        elements.workspaceContent.addEventListener('drop', drop);
+        elements.workspaceContent.addEventListener('mousedown', startDragging);
+        document.addEventListener('mousemove', drag);
+        document.addEventListener('mouseup', stopDragging);
+
+        // Save workflow
+        elements.saveButton.addEventListener('click', saveWorkflow);
+
+        // Help button
+        elements.helpButton.addEventListener('click', showHelpModal);
+
+        // Context menu
+        elements.workspaceContent.addEventListener('contextmenu', showContextMenu);
+        document.addEventListener('click', hideContextMenu);
+
+        // Panning
+        elements.workspaceContent.addEventListener('mousedown', startPanning);
+        document.addEventListener('mousemove', handlePanning);
+        document.addEventListener('mouseup', stopPanning);
+
+        // Touch events for mobile
+        elements.workspaceContent.addEventListener('touchstart', handleTouchStart, { passive: false });
+        elements.workspaceContent.addEventListener('touchmove', handleTouchMove, { passive: false });
+        elements.workspaceContent.addEventListener('touchend', handleTouchEnd);
+    }
+
+    function toggleActionsPanel() {
+        elements.actions.classList.toggle('expanded');
+    }
+
+    function adjustZoom(amount) {
+        state.zoomLevel = Math.min(Math.max(0.5, state.zoomLevel + amount), 2);
+        updateWorkspaceTransform();
+    }
+
+    function centerCanvas() {
+        state.panOffset = { x: 0, y: 0 };
+        state.zoomLevel = 1;
+        updateWorkspaceTransform();
+    }
+
+    function updateWorkspaceTransform() {
+        elements.workspaceContent.style.transform = `translate(${state.panOffset.x}px, ${state.panOffset.y}px) scale(${state.zoomLevel})`;
+        elements.connectors.style.transform = `translate(${state.panOffset.x}px, ${state.panOffset.y}px) scale(${state.zoomLevel})`;
+        elements.connectors.style.transformOrigin = '0 0';
+    }
+
+    function startPanning(e) {
+        // Only pan if not interacting with a block or connection point
+        if (!e.target.closest('.block-item, .connection-point')) {
+            state.isPanning = true;
+            state.startPanPosition = { x: e.clientX, y: e.clientY };
+            elements.workspaceContent.style.cursor = 'grabbing';
+            e.preventDefault();
+        }
+    }
+
+    function handlePanning(e) {
+        if (state.isPanning) {
+            const dx = e.clientX - state.startPanPosition.x;
+            const dy = e.clientY - state.startPanPosition.y;
+            state.panOffset.x += dx;
+            state.panOffset.y += dy;
+            state.startPanPosition = { x: e.clientX, y: e.clientY };
+            updateWorkspaceTransform();
+            e.preventDefault();
+        }
+    }
+
+    function stopPanning() {
+        state.isPanning = false;
+        elements.workspaceContent.style.cursor = '';
+    }
+
+    function handleTouchStart(e) {
+        if (e.touches.length === 1) {
+            const touch = e.touches[0];
+            state.startPanPosition = { x: touch.clientX, y: touch.clientY };
+            state.isPanning = true;
+            e.preventDefault();
+        }
+    }
+
+    function handleTouchMove(e) {
+        if (state.isPanning && e.touches.length === 1) {
+            const touch = e.touches[0];
+            const dx = touch.clientX - state.startPanPosition.x;
+            const dy = touch.clientY - state.startPanPosition.y;
+            state.panOffset.x += dx;
+            state.panOffset.y += dy;
+            state.startPanPosition = { x: touch.clientX, y: touch.clientY };
+            updateWorkspaceTransform();
+            e.preventDefault();
+        }
+    }
+
+    function handleTouchEnd() {
+        state.isPanning = false;
+    }
+
+    function loadSavedWorkflow(data) {
+        // Clear existing blocks and connections
+        elements.workspaceContent.querySelectorAll('.block-item').forEach(el => el.remove());
+        elements.connectors.innerHTML = '';
+        state.connections = [];
+
+        const blockMap = new Map();
+
+        // Create blocks from saved data
+        data.blocks.forEach(block => {
+            const blockElement = createBlockElement(block.type);
+            blockElement.style.left = `${block.x}px`;
+            blockElement.style.top = `${block.y}px`;
+            blockElement.dataset.id = block.id;
+            elements.workspaceContent.appendChild(blockElement);
+            createConnectionPoints(blockElement);
+
+            // Restore block settings
+            const select = blockElement.querySelector('select');
+            const input = blockElement.querySelector('input');
+
+            if (select && block.meta.selectedValue) {
+                select.value = block.meta.selectedValue;
+            }
+            if (input && block.meta.inputValue) {
+                input.value = block.meta.inputValue;
+            }
+
+            blockMap.set(block.id, blockElement);
+            state.blockIdCounter = Math.max(state.blockIdCounter, parseInt(block.id) + 1);
+        });
+
+        // Restore connections
+        data.connections.forEach(connection => {
+            const fromElement = blockMap.get(connection.from);
+            const toElement = blockMap.get(connection.to);
+
+            if (fromElement && toElement) {
+                const fromPoint = fromElement.querySelector('.connection-point[data-position="right"]');
+                const toPoint = toElement.querySelector('.connection-point[data-position="left"]');
+
+                if (fromPoint && toPoint) {
+                    const connector = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    connector.setAttribute('class', 'connector');
+                    elements.connectors.appendChild(connector);
+
+                    state.connections.push({ 
+                        start: fromPoint, 
+                        end: toPoint, 
+                        connector: connector 
+                    });
+                }
+            }
+        });
+
+        updateConnections();
+        updatePlaceholder();
+    }
+
+    function createBlockElement(type) {
+        const blockTemplate = elements.actions.querySelector(`[data-type="${type}"]`);
+        const clone = blockTemplate.cloneNode(true);
+
+        clone.classList.add('block-item');
+        clone.dataset.type = type;
+        clone.dataset.id = state.blockIdCounter++;
+        clone.draggable = false; // We'll handle dragging ourselves
+
+        // Remove hover effects from the placed block
+        clone.classList.remove('hover:bg-indigo-600', 'hover:bg-green-600', 'hover:bg-purple-600');
+        clone.classList.remove('hover:shadow-lg');
+
+        return clone;
+    }
+
+    function createConnectionPoints(block) {
+        ['left', 'right'].forEach(position => {
+            const point = document.createElement('div');
+            point.classList.add('connection-point');
+            point.dataset.position = position;
+            block.appendChild(point);
+
+            point.addEventListener('mousedown', handleConnectionPoint);
+            point.addEventListener('touchstart', handleConnectionPointTouch, { passive: false });
+        });
+    }
+
+    function handleConnectionPoint(e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        const clickedPoint = e.target;
+        if (!state.currentConnection) {
+            startNewConnection(clickedPoint);
+        } else {
+            completeConnection(clickedPoint);
+        }
+    }
+
+    function handleConnectionPointTouch(e) {
+        e.stopPropagation();
+        e.preventDefault();
+
+        if (e.touches.length === 1) {
+            const touch = e.touches[0];
+            const clickedPoint = e.target;
+
+            if (!state.currentConnection) {
+                startNewConnection(clickedPoint);
+            } else {
+                completeConnection(clickedPoint);
+            }
+        }
+    }
+
+    function startNewConnection(point) {
+        if (point.dataset.position === 'right') {
+            const connector = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            connector.setAttribute('class', 'connector');
+            elements.connectors.appendChild(connector);
+
+            state.currentConnection = { 
+                start: point, 
+                connector: connector 
+            };
+
+            document.addEventListener('mousemove', updateCurrentConnection);
+            document.addEventListener('mouseup', finishConnection);
+
+            // For touch devices
+            document.addEventListener('touchmove', updateCurrentConnectionTouch, { passive: false });
+            document.addEventListener('touchend', finishConnectionTouch);
+        }
+    }
+
+    function updateCurrentConnection(e) {
+        if (state.currentConnection) {
+            const startPos = getConnectionPointPosition(state.currentConnection.start);
+            const endPos = {
+                x: (e.clientX - elements.workspace.getBoundingClientRect().left - state.panOffset.x) / state.zoomLevel,
+                y: (e.clientY - elements.workspace.getBoundingClientRect().top - state.panOffset.y) / state.zoomLevel
+            };
+            drawConnection({ start: startPos, end: endPos }, state.currentConnection.connector);
+        }
+    }
+
+    function updateCurrentConnectionTouch(e) {
+        if (state.currentConnection && e.touches.length === 1) {
+            const touch = e.touches[0];
+            const startPos = getConnectionPointPosition(state.currentConnection.start);
+            const endPos = {
+                x: (touch.clientX - elements.workspace.getBoundingClientRect().left - state.panOffset.x) / state.zoomLevel,
+                y: (touch.clientY - elements.workspace.getBoundingClientRect().top - state.panOffset.y) / state.zoomLevel
+            };
+            drawConnection({ start: startPos, end: endPos }, state.currentConnection.connector);
+            e.preventDefault();
+        }
+    }
+
+    function finishConnection(e) {
+        cleanupConnectionEvents();
+
+        if (state.currentConnection && e.target.classList.contains('connection-point')) {
+            completeConnection(e.target);
+        } else {
+            elements.connectors.removeChild(state.currentConnection.connector);
+            state.currentConnection = null;
+        }
+    }
+
+    function finishConnectionTouch(e) {
+        cleanupConnectionEvents();
+
+        if (state.currentConnection && e.changedTouches.length === 1) {
+            const touch = e.changedTouches[0];
+            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+
+            if (element && element.classList.contains('connection-point')) {
+                completeConnection(element);
+            } else {
+                elements.connectors.removeChild(state.currentConnection.connector);
+                state.currentConnection = null;
+            }
+        }
+    }
+
+    function cleanupConnectionEvents() {
+        document.removeEventListener('mousemove', updateCurrentConnection);
+        document.removeEventListener('mouseup', finishConnection);
+        document.removeEventListener('touchmove', updateCurrentConnectionTouch);
+        document.removeEventListener('touchend', finishConnectionTouch);
+    }
+
+    function completeConnection(point) {
+        if (point !== state.currentConnection.start && point.dataset.position === 'left') {
+            state.currentConnection.end = point;
+            state.connections.push(state.currentConnection);
+            updateConnections();
+        } else {
+            elements.connectors.removeChild(state.currentConnection.connector);
+        }
+        state.currentConnection = null;
+    }
+
+    function drawConnection(connection, connector) {
+        const startPos = connection.start;
+        const endPos = connection.end;
+
+        // Calculate control points for a smooth curve
+        const controlOffset = Math.min(Math.abs(endPos.x - startPos.x) / 2, 100);
+        const startControl = { x: startPos.x + controlOffset, y: startPos.y };
+        const endControl = { x: endPos.x - controlOffset, y: endPos.y };
+
+        const d = `M ${startPos.x},${startPos.y} C ${startControl.x},${startPos.y} ${endControl.x},${endPos.y} ${endPos.x},${endPos.y}`;
+        connector.setAttribute('d', d);
+    }
+
+    function getConnectionPointPosition(point) {
+        const rect = point.getBoundingClientRect();
+        const workspaceRect = elements.workspace.getBoundingClientRect();
+
+        return {
+            x: (rect.left + rect.width / 2 - workspaceRect.left - state.panOffset.x) / state.zoomLevel,
+            y: (rect.top + rect.height / 2 - workspaceRect.top - state.panOffset.y) / state.zoomLevel
+        };
+    }
+
+    function dragStart(e) {
+        const actionBlock = e.target.closest('.action-block');
+        if (actionBlock) {
+            const clone = createBlockElement(actionBlock.dataset.type);
+            elements.workspaceContent.appendChild(clone);
+
+            // Position the clone at the mouse position
+            const rect = elements.workspaceContent.getBoundingClientRect();
+            const x = (e.clientX - rect.left - state.panOffset.x) / state.zoomLevel - 110; // Center the block
+            const y = (e.clientY - rect.top - state.panOffset.y) / state.zoomLevel - 40;
+
+            clone.style.left = `${x}px`;
+            clone.style.top = `${y}px`;
+
+            state.draggedElement = clone;
+            state.offset = { x: e.offsetX, y: e.offsetY };
+
+            createConnectionPoints(clone);
+            updatePlaceholder();
+        }
+    }
+
+    function dragOver(e) {
+        e.preventDefault();
+    }
+
+    function drop(e) {
+        e.preventDefault();
+        if (state.draggedElement) {
+            state.draggedElement = null;
+        }
+    }
+
+    function startDragging(e) {
+        const block = e.target.closest('.block-item');
+        if (block && !e.target.classList.contains('connection-point')) {
+            state.draggedElement = block;
+
+            // Calculate offset relative to the block's position
+            const rect = block.getBoundingClientRect();
+            state.offset = {
+                x: e.clientX - rect.left,
+                y: e.clientY - rect.top
+            };
+
+            // Bring to front
+            block.style.zIndex = '20';
+
+            e.preventDefault();
+        }
+    }
+
+    function drag(e) {
+        if (state.draggedElement) {
+            const x = (e.clientX - elements.workspace.getBoundingClientRect().left - state.panOffset.x) / state.zoomLevel - state.offset.x;
+            const y = (e.clientY - elements.workspace.getBoundingClientRect().top - state.panOffset.y) / state.zoomLevel - state.offset.y;
+
+            state.draggedElement.style.left = `${x}px`;
+            state.draggedElement.style.top = `${y}px`;
+
+            updateConnections();
+            e.preventDefault();
+        }
+    }
+
+    function stopDragging() {
+        if (state.draggedElement) {
+            state.draggedElement.style.zIndex = '10';
+            state.draggedElement = null;
+        }
+    }
+
+    function updateConnections() {
+        state.connections.forEach(connection => {
+            const startPos = getConnectionPointPosition(connection.start);
+            const endPos = getConnectionPointPosition(connection.end);
+            drawConnection({ start: startPos, end: endPos }, connection.connector);
+        });
+    }
+
+    function updatePlaceholder() {
+        const blocks = elements.workspaceContent.querySelectorAll('.block-item');
+        elements.placeholder.style.display = blocks.length > 0 ? 'none' : 'block';
+    }
+
+    function showContextMenu(e) {
+        e.preventDefault();
+        hideContextMenu();
+
+        const target = e.target.closest('.block-item, .connector');
+        if (target) {
+            const contextMenu = document.createElement('div');
+            contextMenu.id = 'context-menu';
+            contextMenu.style.left = `${e.clientX}px`;
+            contextMenu.style.top = `${e.clientY}px`;
+
+            // Delete option
+            const deleteOption = document.createElement('div');
+            deleteOption.textContent = 'Delete';
+            deleteOption.classList.add('context-menu-item', 'delete');
+
+            deleteOption.addEventListener('click', () => {
+                if (target.classList.contains('block-item')) {
+                    deleteBlock(target);
+                } else if (target.classList.contains('connector')) {
+                    deleteConnection(target);
+                }
+                hideContextMenu();
+            });
+
+            contextMenu.appendChild(deleteOption);
+            document.body.appendChild(contextMenu);
+        }
+    }
+
+    function hideContextMenu() {
+        const existingMenu = document.getElementById('context-menu');
+        if (existingMenu) {
+            existingMenu.remove();
+        }
+    }
+
+    function deleteBlock(block) {
+        // Remove all connections involving this block
+        state.connections = state.connections.filter(conn => {
+            if (conn.start.parentElement === block || conn.end.parentElement === block) {
+                elements.connectors.removeChild(conn.connector);
+                return false;
+            }
+            return true;
+        });
+
+        elements.workspaceContent.removeChild(block);
+        updatePlaceholder();
+    }
+
+    function deleteConnection(connector) {
+        const index = state.connections.findIndex(conn => conn.connector === connector);
+        if (index !== -1) {
+            state.connections.splice(index, 1);
+            elements.connectors.removeChild(connector);
+        }
+    }
+
+    async function saveWorkflow() {
+        const blocks = Array.from(elements.workspaceContent.querySelectorAll('.block-item'));
+        const blockData = blocks.map(block => {
+            let meta = {};
+            const select = block.querySelector('select');
+            const input = block.querySelector('input');
+
+            if (select) {
+                meta.selectedValue = select.value;
+            }
+            if (input) {
+                meta.inputValue = input.value;
+            }
+
+            return {
+                id: block.dataset.id,
+                type: block.dataset.type,
+                x: parseFloat(block.style.left),
+                y: parseFloat(block.style.top),
+                meta: meta
+            };
+        });
+
+        const connectionData = state.connections.map(connection => ({
+            from: connection.start.parentElement.dataset.id,
+            to: connection.end.parentElement.dataset.id
+        }));
+
+        try {
+            const response = await fetch('/instance/<%= req.params.id %>/automations/save-workflow', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ blocks: blockData, connections: connectionData })
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                showNotification('Workflow saved successfully!', 'success');
+            } else {
+                throw new Error(result.message || 'Unknown error occurred');
+            }
+        } catch (error) {
+            console.error('Error saving workflow:', error);
+            showNotification('Failed to save workflow: ' + error.message, 'error');
+        }
+    }
+
+    function showNotification(message, type) {
+        const notification = document.createElement('div');
+        notification.className = `fixed bottom-4 right-4 px-4 py-2 rounded-md shadow-lg ${
+            type === 'success' ? 'bg-green-600' : 'bg-red-600'
+        } text-white`;
+        notification.textContent = message;
+        document.body.appendChild(notification);
+
+        setTimeout(() => {
+            notification.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+
+    function showHelpModal() {
+        const modal = document.createElement('div');
+        modal.className = 'fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50 p-4';
+        modal.innerHTML = `
+            <div class="bg-gray-800 rounded-xl max-w-md w-full p-6 max-h-[80vh] overflow-y-auto">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold">Workflow Builder Help</h3>
+                    <button class="text-gray-400 hover:text-white" id="close-help">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                <div class="space-y-4 text-sm text-gray-300">
+                    <div>
+                        <h4 class="font-medium text-white mb-1">Creating a Workflow</h4>
+                        <p>Drag actions from the left panel onto the canvas to build your automation workflow.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-white mb-1">Connecting Actions</h4>
+                        <p>Click and drag from the right connection point of one block to the left connection point of another to create a connection.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-white mb-1">Editing Blocks</h4>
+                        <p>Click on any block to edit its settings. For example, change the interval time or power action type.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-white mb-1">Deleting Elements</h4>
+                        <p>Right-click on any block or connection and select "Delete" to remove it from your workflow.</p>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-white mb-1">Navigating the Canvas</h4>
+                        <p>Click and drag on empty space to pan the canvas. Use the zoom buttons to adjust your view.</p>
+                    </div>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+        modal.querySelector('#close-help').addEventListener('click', () => modal.remove());
+    }
+});
+</script>

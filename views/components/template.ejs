@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= name %></title>
+    <% if (logo == true) { %>
+        <link rel="icon" href="/assets/logo.png" type="image/x-icon">
+    <% } %>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Tailwind and Alpine -->
+    <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <style>
+        :root {
+            --header-bg: rgba(23, 23, 23, 0.9);
+            --header-active: rgba(79, 70, 229, 0.2);
+            --header-hover: rgba(255, 255, 255, 0.05);
+            --header-text: rgba(255, 255, 255, 0.8);
+            --header-text-active: rgba(255, 255, 255, 0.95);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #171717;
+            color: rgba(255, 255, 255, 0.8);
+            padding-top: 64px; /* Space for the fixed header */
+        }
+
+        /* Header styles */
+        .header {
+            background: var(--header-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+            height: 64px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 40;
+            display: flex;
+            align-items: center;
+        }
+
+        .header.collapsed {
+            height: 48px;
+        }
+
+        .header.collapsed .header-text,
+        .header.collapsed .header-footer-text,
+        .header.collapsed .header-section-title {
+            display: none;
+        }
+
+        .header.collapsed .header-link {
+            justify-content: center;
+        }
+
+        .header.collapsed .header-icon {
+            margin-right: 0;
+        }
+
+        .header-link {
+            position: relative;
+            color: var(--header-text);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 0.5rem;
+        }
+
+        .header-link:hover {
+            background: var(--header-hover);
+            color: var(--header-text-active);
+            transform: translateY(-2px);
+        }
+
+        .header-link.active {
+            background: var(--header-active);
+            color: var(--header-text-active);
+            font-weight: 500;
+        }
+
+        .header-link.active::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #4f46e5;
+            border-radius: 3px 3px 0 0;
+        }
+
+        .header-icon {
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            margin-right: 8px;
+        }
+
+        .header-link:hover .header-icon {
+            transform: scale(1.1);
+        }
+
+        .header-link.active .header-icon {
+            color: #818cf8;
+        }
+
+        /* User dropdown */
+        .user-dropdown {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            background: rgba(23, 23, 23, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Loading animations */
+        @keyframes loading {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        .loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: linear-gradient(to right, #4f46e5, #818cf8);
+            animation: loading 0.5s ease-in-out;
+            z-index: 1000;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        /* Toggle button */
+        .header-toggle {
+            width: 24px;
+            height: 24px;
+            background: var(--header-bg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10;
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+
+        .header-toggle:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        /* Navigation container */
+        .header-nav {
+            display: flex;
+            align-items: center;
+            height: 100%;
+            padding: 0 16px;
+            width: 100%;
+            overflow-x: auto;
+            scrollbar-width: none; /* Hide scrollbar for Firefox */
+        }
+
+        .header-nav::-webkit-scrollbar {
+            display: none; /* Hide scrollbar for Chrome/Safari */
+        }
+
+        .header-items {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            height: 100%;
+        }
+
+        /* Logo/brand area */
+        .header-brand {
+            display: flex;
+            align-items: center;
+            margin-right: 24px;
+        }
+
+        /* User area */
+        .header-user {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+    </style>
+</head>
+
+<body x-data="{ 
+        headerOpen: false, 
+        currentPath: window.location.pathname,
+        headerCollapsed: localStorage.getItem('headerCollapsed') === 'true' 
+    }" 
+    @keydown.escape="headerOpen = false"
+    :class="headerCollapsed ? 'header-collapsed' : ''">
+    <!-- Loading bar -->
+    <div class="loading-bar"></div>
+
+    <!-- Header -->
+    <header class="header" 
+            :class="{'collapsed': headerCollapsed}">
+        <div class="header-nav">
+            <!-- Toggle button -->
+            <div class="header-toggle mr-4" 
+                 @click="headerCollapsed = !headerCollapsed; localStorage.setItem('headerCollapsed', headerCollapsed)">
+                <i class="fas" :class="headerCollapsed ? 'fa-chevron-down' : 'fa-chevron-up'"></i>
+            </div>
+
+            <!-- Brand/Logo -->
+            <div class="header-brand">
+                <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white">
+                    <i class="fas fa-cube text-sm"></i>
+                </div>
+                <span class="ml-2 font-medium header-text"><%= name %></span>
+            </div>
+
+            <!-- Navigation -->
+            <div class="header-items">
+                <a href="../instances" class="header-link flex items-center px-3 py-2 text-sm"
+                   :class="{'active': currentPath.includes('/instances')}">
+                    <div class="header-icon">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <span class="header-text">Servers</span>
+                    <span class="ml-1 bg-indigo-500/10 text-indigo-400 text-xs px-1.5 py-0.5 rounded-full header-text"></span>
+                </a>
+                
+                <a href="../account" class="header-link flex items-center px-3 py-2 text-sm"
+                   :class="{'active': currentPath.includes('/account')}">
+                    <div class="header-icon">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                    <span class="header-text">Account</span>
+                </a>
+                
+                <% if (req.user.admin === true) { %>
+                <a href="/admin/overview" class="header-link flex items-center px-3 py-2 text-sm"
+                   :class="{'active': currentPath.includes('/admin')}">
+                    <div class="header-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <span class="header-text">Admin</span>
+                    <span class="ml-1 bg-red-500/10 text-red-400 text-xs px-1.5 py-0.5 rounded-full header-text">Admin</span>
+                </a>
+                <% } %>
+            </div>
+
+            <!-- User area -->
+            <div class="header-user">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center text-white">
+                        <i class="fas fa-user text-sm"></i>
+                    </div>
+                    <div class="flex-1 min-w-0 header-text">
+                        <p class="text-sm font-medium truncate"><%= user.username %></p>
+                    </div>
+                </div>
+                <button onclick="window.location.href='/login'" class="text-gray-400 hover:text-white header-text ml-2">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+                    
+    <script>
+        // Remove loading bar after animation
+        setTimeout(() => {
+            document.querySelector('.loading-bar').style.display = 'none';
+        }, 500);
+
+        // Track current path for active header links
+        document.addEventListener('alpine:init', () => {
+            Alpine.data('currentPath', () => ({
+                currentPath: window.location.pathname
+            }));
+        });
+    </script>
+</body>
+</html>

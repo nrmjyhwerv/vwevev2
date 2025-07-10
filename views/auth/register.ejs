@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= name %></title>
+  <link href="../assets/tailwind.css" rel="stylesheet">
+  <link rel="preconnect" href="https://cdn.fontshare.com" crossorigin>
+  <link href="https://api.fontshare.com/v2/css?f[]=clash-display@400,500,600,700&f[]=satoshi@400,500,700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --background: #0f172a;
+      --surface: rgba(30, 41, 59, 0.85); /* Added transparency */
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --error: #ef4444;
+      --success: #10b981;
+    }
+
+    body {
+      color: var(--text-primary);
+      font-family: 'Satoshi', sans-serif;
+      min-height: 100vh;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Background video container - full clarity */
+    .video-background {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      overflow: hidden;
+    }
+
+    .video-background video {
+      min-width: 100%;
+      min-height: 100%;
+      object-fit: cover;
+    }
+
+    .form-container {
+      background: var(--surface);
+      padding: 2.5rem;
+      border-radius: 1rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      width: 100%;
+      max-width: 28rem;
+      position: relative;
+      overflow: hidden;
+      margin: 1rem;
+      backdrop-filter: none; /* Removed blur */
+      border: 1px solid rgba(255, 255, 255, 0.1); /* Added subtle border */
+    }
+
+    .form-container::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+      animation: rotate 15s linear infinite;
+      z-index: 0;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .form-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .title {
+      font-family: 'Clash Display', sans-serif;
+      font-weight: 600;
+      color: var(--text-primary);
+      letter-spacing: -0.025em;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3); /* Added text shadow for better visibility */
+    }
+
+    .input-field {
+      background: rgba(15, 23, 42, 0.7);
+      border: 1px solid #334155;
+      color: var(--text-primary);
+      padding: 0.875rem 1rem;
+      border-radius: 0.5rem;
+      transition: all 0.2s ease;
+      font-size: 0.9375rem;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    .input-field:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+      outline: none;
+    }
+
+    .input-field::placeholder {
+      color: var(--text-secondary);
+      opacity: 0.7;
+    }
+
+    .submit-btn {
+      background: var(--primary);
+      transition: all 0.2s ease;
+      padding: 0.875rem 1rem;
+      border-radius: 0.5rem;
+      font-weight: 500;
+      font-size: 0.9375rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+      width: 100%;
+      border: none;
+      cursor: pointer;
+      color: white;
+    }
+
+    .submit-btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+    }
+
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+
+    .submit-btn:disabled {
+      background: #64748b;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .form-group {
+      position: relative;
+      margin-bottom: 1.25rem;
+    }
+
+    .label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: var(--text-primary);
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2); /* Added text shadow */
+    }
+
+    .password-toggle {
+      position: absolute;
+      right: 1rem;
+      top: 2.5rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: color 0.2s ease;
+      background: none;
+      border: none;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .password-toggle:hover {
+      color: var(--primary);
+    }
+
+    .link {
+      color: var(--primary);
+      font-weight: 500;
+      transition: color 0.2s ease;
+      text-decoration: none;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2); /* Added text shadow */
+    }
+
+    .link:hover {
+      color: var(--primary-hover);
+      text-decoration: underline;
+    }
+
+    .error-message {
+      color: var(--error);
+      font-size: 0.8125rem;
+      margin-top: 0.25rem;
+      display: none;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2); /* Added text shadow */
+    }
+
+    .input-field.error {
+      border-color: var(--error);
+    }
+
+    .success-message {
+      color: var(--success);
+      font-size: 0.875rem;
+      margin-top: 1rem;
+      text-align: center;
+      display: none;
+      text-shadow: 0 1px 1px rgba(0, 0, 0, 0.2); /* Added text shadow */
+    }
+
+    @media (max-width: 640px) {
+      .form-container {
+        padding: 1.5rem;
+        border-radius: 0;
+        min-height: 100vh;
+        margin: 0;
+        max-width: 100%;
+      }
+
+      body {
+        padding: 0;
+      }
+    }
+
+    /* Animation classes */
+    .animate-fade-in {
+      animation: fadeIn 0.5s ease-out forwards;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Loading spinner */
+    .spinner {
+      display: inline-block;
+      width: 1rem;
+      height: 1rem;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 1s ease-in-out infinite;
+      margin-right: 0.5rem;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body class="h-full flex items-center justify-center p-4">
+  <!-- Background video element - replace the src with your video URL -->
+  <div class="video-background">
+    <video autoplay muted loop playsinline>
+      <!-- Set your video URL here -->
+      <source src="https://motionbgs.com/media/3929/fortnite-japanese-biome.1920x1080.mp4" type="video/mp4">
+      Your browser does not support the video tag.
+    </video>
+  </div>
+
+  <div class="form-container animate-fade-in">
+    <div class="form-content">
+      <div class="text-center mb-8">
+        <h1 class="title text-3xl mb-2">Create Account</h1>
+        <p class="text-sm text-gray-400">Join our platform to get started</p>
+      </div>
+
+      <form method="POST" action="/auth/register" id="registerForm" class="mb-4" novalidate>
+        <div class="form-group">
+          <label for="username" class="label">Username</label>
+          <input 
+            type="text" 
+            id="username" 
+            name="username" 
+            placeholder="Enter your username" 
+            class="input-field w-full"
+            required
+            autocomplete="username"
+            minlength="3"
+            maxlength="30"
+          >
+          <div class="error-message" id="username-error"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="email" class="label">Email</label>
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            placeholder="your@email.com" 
+            class="input-field w-full"
+            required
+            autocomplete="email"
+            maxlength="255"
+          >
+          <div class="error-message" id="email-error"></div>
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="label">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            placeholder="••••••••" 
+            class="input-field w-full"
+            required
+            autocomplete="new-password"
+            minlength="8"
+            maxlength="100"
+          >
+          <button type="button" class="password-toggle" id="togglePassword" aria-label="Toggle password visibility">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+          </button>
+          <div class="error-message" id="password-error"></div>
+        </div>
+
+        <button type="submit" class="submit-btn w-full font-medium mb-6 mt-2" id="submitBtn">
+          <span id="submitText">Register</span>
+          <span id="submitSpinner" class="spinner" style="display: none;"></span>
+        </button>
+
+        <div class="success-message" id="success-message"></div>
+      </form>
+
+      <div class="text-center text-sm">
+        Already have an account? 
+        <a href="/login" class="link">Sign in</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Password toggle functionality
+      const togglePassword = document.getElementById('togglePassword');
+      const password = document.getElementById('password');
+      const passwordIcon = togglePassword.querySelector('svg');
+
+      if (togglePassword && password) {
+        togglePassword.addEventListener('click', function() {
+          const type = password.getAttribute('type') === 'password' ? 'text' : 'password';
+          password.setAttribute('type', type);
+
+          // Toggle SVG icon
+          if (type === 'password') {
+            passwordIcon.innerHTML = `
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            `;
+          } else {
+            passwordIcon.innerHTML = `
+              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+              <line x1="1" y1="1" x2="23" y2="23"></line>
+            `;
+          }
+        });
+      }
+
+      // Form validation and submission
+      const form = document.getElementById('registerForm');
+      const submitBtn = document.getElementById('submitBtn');
+      const submitText = document.getElementById('submitText');
+      const submitSpinner = document.getElementById('submitSpinner');
+
+      if (form) {
+        // Real-time validation
+        form.addEventListener('input', function(e) {
+          const target = e.target;
+          if (target.matches('input')) {
+            validateField(target);
+          }
+        });
+
+        // Form submission
+        form.addEventListener('submit', async function(e) {
+          e.preventDefault();
+
+          // Validate all fields
+          let isValid = true;
+          const inputs = form.querySelectorAll('input');
+
+          inputs.forEach(input => {
+            if (!validateField(input)) {
+              isValid = false;
+            }
+          });
+
+          if (!isValid) return;
+
+          // Disable submit button and show spinner
+          submitBtn.disabled = true;
+          submitText.textContent = 'Processing...';
+          submitSpinner.style.display = 'inline-block';
+
+          try {
+            // Simulate form submission (replace with actual fetch)
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            // Show success message
+            document.getElementById('success-message').style.display = 'block';
+            document.getElementById('success-message').textContent = 'Registration successful! Redirecting...';
+
+            // Reset form
+            form.reset();
+
+            // Redirect after delay (in a real app, this would happen after server response)
+            setTimeout(() => {
+              window.location.href = '/login';
+            }, 2000);
+          } catch (error) {
+            showError(null, 'success-message', 'Registration failed. Please try again.');
+          } finally {
+            submitBtn.disabled = false;
+            submitText.textContent = 'Register';
+            submitSpinner.style.display = 'none';
+          }
+        });
+      }
+
+      function validateField(input) {
+        const errorId = `${input.id}-error`;
+        const errorElement = document.getElementById(errorId);
+
+        // Clear previous error
+        input.classList.remove('error');
+        errorElement.style.display = 'none';
+        errorElement.textContent = '';
+
+        // Validate based on input type
+        if (input.required && !input.value.trim()) {
+          showError(input, errorId, 'This field is required');
+          return false;
+        }
+
+        if (input.id === 'username' && input.value.length < 3) {
+          showError(input, errorId, 'Username must be at least 3 characters');
+          return false;
+        }
+
+        if (input.id === 'email' && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(input.value)) {
+          showError(input, errorId, 'Please enter a valid email address');
+          return false;
+        }
+
+        if (input.id === 'password' && input.value.length < 8) {
+          showError(input, errorId, 'Password must be at least 8 characters');
+          return false;
+        }
+
+        return true;
+      }
+
+      function showError(input, errorId, message) {
+        if (input) input.classList.add('error');
+        const errorElement = document.getElementById(errorId);
+        if (errorElement) {
+          errorElement.textContent = message;
+          errorElement.style.display = 'block';
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= name %> - Login</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --background: #141414;
+      --surface: #1e293b;
+      --border: #334155;
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+    }
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: var(--background);
+      color: var(--text-primary);
+      overflow-x: hidden;
+    }
+    
+    .fade-in { 
+      opacity: 0; 
+      transform: translateY(10px); 
+    }
+    
+    .card {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    }
+    
+    .form-input {
+      transition: all 0.3s ease;
+      background: rgba(15, 23, 42, 0.5);
+      border: 1px solid var(--border);
+    }
+    
+    .form-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      background: rgba(15, 23, 42, 0.8);
+    }
+    
+    .btn-primary {
+      background: linear-gradient(135deg, var(--primary), #7c3aed);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-hover), #6d28d9);
+      transform: translateY(-2px);
+      box-shadow: 0 10px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-primary:active {
+      transform: translateY(0);
+    }
+    
+    .glow {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.1), transparent 70%);
+      z-index: -1;
+    }
+    
+    .floating {
+      animation: floating 6s ease-in-out infinite;
+    }
+    
+    @keyframes floating {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+  <!-- Background glow effect -->
+  <div class="glow"></div>
+  
+  <!-- Main content -->
+  <main class="flex-grow flex items-center justify-center p-4">
+    <div class="card p-8 md:p-10 max-w-md w-full fade-in relative overflow-hidden">
+      <!-- Floating decorative elements -->
+      <div class="absolute -top-20 -right-20 w-40 h-40 rounded-full bg-indigo-500/10 blur-3xl"></div>
+      <div class="absolute -bottom-20 -left-20 w-40 h-40 rounded-full bg-indigo-500/10 blur-3xl"></div>
+      
+      <div class="flex flex-col items-center mb-8 fade-in">
+        <div class="p-4 bg-indigo-500/10 rounded-2xl mb-4 floating">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-10 h-10 text-indigo-400">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
+          </svg>
+        </div>
+        
+        <div class="text-center">
+          <h2 class="text-2xl md:text-3xl font-bold text-white mb-1">Welcome To Cryptalis</h2>
+          <p class="text-sm text-gray-400">Please enter your credentials to login</p>
+        </div>
+      </div>
+         
+      <!-- Login Form -->
+      <form method="POST" action="/auth/login" class="space-y-5 fade-in" id="loginForm">
+        <div class="space-y-4">
+          <div>
+            <label for="username" class="block text-sm font-medium text-gray-300 mb-2 flex items-center">
+              <i class="fas fa-user mr-2 text-indigo-400"></i>
+              Username or Email
+            </label>
+            <div class="relative">
+              <input type="text" 
+                id="username" 
+                name="username" 
+                class="form-input w-full p-3 pl-10 rounded-lg text-white placeholder-gray-500 focus:outline-none" 
+                placeholder="john.doe@example.com" 
+                required
+                autocomplete="username">
+              <i class="fas fa-envelope absolute left-3 top-3.5 text-gray-500 text-sm"></i>
+            </div>
+          </div>
+          
+          <div>
+            <label for="password" class="block text-sm font-medium text-gray-300 mb-2 flex items-center">
+              <i class="fas fa-lock mr-2 text-indigo-400"></i>
+              Password
+            </label>
+            <div class="relative">
+              <input type="password" 
+                id="password" 
+                name="password" 
+                class="form-input w-full p-3 pl-10 rounded-lg text-white placeholder-gray-500 focus:outline-none" 
+                placeholder="••••••••" 
+                required
+                autocomplete="current-password">
+              <i class="fas fa-key absolute left-3 top-3.5 text-gray-500 text-sm"></i>
+            </div>
+          </div>
+        </div>
+        
+        <div class="flex items-center justify-between fade-in">
+          <div class="flex items-center">
+            <input id="remember-me" name="remember-me" type="checkbox" class="h-4 w-4 rounded bg-gray-800 border-gray-700 text-indigo-600 focus:ring-indigo-500">
+            <label for="remember-me" class="ml-2 block text-sm text-gray-300">Remember me</label>
+          </div>
+          
+          <a href="/forgot-password" class="text-sm text-indigo-400 hover:text-indigo-300 transition font-medium flex items-center">
+            <i class="fas fa-question-circle mr-1"></i> Forgot password?
+          </a>
+        </div>
+        
+        <button type="submit" class="btn-primary w-full flex items-center justify-center gap-2 text-white font-semibold py-3 px-5 rounded-lg mt-6">                     
+          <span>Sign In</span>
+          <i class="fas fa-arrow-right"></i>
+        </button>
+      </form>
+      
+      <!-- Divider -->
+      <div class="relative my-6 fade-in">
+        <div class="absolute inset-0 flex items-center">
+          <div class="w-full border-t border-gray-700"></div>
+        </div>
+        <div class="relative flex justify-center">
+          <span class="px-3 bg-gray-800 text-sm text-gray-400">New to our platform?</span>
+        </div>
+      </div>
+      
+      <!-- Register Button -->
+      <a href="/register" class="fade-in w-full flex items-center justify-center gap-2 bg-gray-800 hover:bg-gray-700 text-white font-medium py-3 px-5 rounded-lg transition duration-300 border border-gray-700 hover:border-gray-600">
+        <span>Create an account</span>
+        <i class="fas fa-user-plus"></i>
+      </a>
+    </div>
+  </main>
+
+  <script>
+    // Enhanced animations
+    document.addEventListener('DOMContentLoaded', () => {
+      // Staggered fade-in animation with different delays
+      gsap.to(".fade-in", { 
+        opacity: 1, 
+        y: 0, 
+        duration: 0.8, 
+        stagger: {
+          each: 0.15,
+          from: "center"
+        },
+        ease: "power2.out" 
+      });
+      
+      // Form submission animation
+      const loginForm = document.getElementById('loginForm');
+      if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+          const button = loginForm.querySelector('button[type="submit"]');
+          gsap.to(button, {
+            scale: 0.95,
+            duration: 0.2,
+            yoyo: true,
+            repeat: 1
+          });
+        });
+      }
+      
+      // Add ripple effect to buttons
+      document.querySelectorAll('button, a[href]').forEach(button => {
+        button.addEventListener('click', function(e) {
+          const x = e.clientX - e.target.getBoundingClientRect().left;
+          const y = e.clientY - e.target.getBoundingClientRect().top;
+          
+          const ripple = document.createElement('span');
+          ripple.className = 'ripple-effect';
+          ripple.style.left = `${x}px`;
+          ripple.style.top = `${y}px`;
+          
+          this.appendChild(ripple);
+          
+          setTimeout(() => {
+            ripple.remove();
+          }, 1000);
+        });
+      });
+    });
+    
+    // Add styles for ripple effect
+    const style = document.createElement('style');
+    style.textContent = `
+      .ripple-effect {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        transform: scale(0);
+        animation: ripple 0.6s linear;
+        pointer-events: none;
+        width: 20px;
+        height: 20px;
+        margin-left: -10px;
+        margin-top: -10px;
+      }
+      
+      @keyframes ripple {
+        to {
+          transform: scale(10);
+          opacity: 0;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  </script>
+</body>
+</html>

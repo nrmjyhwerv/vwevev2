@@ -1,0 +1,644 @@
+<%- include('../components/admin_template') %>
+<main id="content" class="relative">
+  <div class="bg-transparent px-4 sm:px-6 lg:px-8">
+    <!-- Header Section -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 pt-6 pb-4">
+      <div>
+        <h1 class="text-2xl font-bold text-white"><%= req.translations.nodes %></h1>
+        <p class="mt-1 text-sm text-neutral-400 max-w-2xl"></p>
+      </div>
+      <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+        <button onclick="radarcheck()" type="button" class="flex items-center justify-center gap-2 w-full sm:w-auto px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-neutral-300 border border-neutral-700 transition-colors duration-200">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256" class="flex-shrink-0">
+            <path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"></path>
+          </svg>
+          <span class="truncate">Run Radar Scan</span>
+        </button>
+        <button id="createButton" type="button" class="w-full sm:w-auto px-4 py-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white transition-colors duration-200 flex items-center justify-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" viewBox="0 0 256 256" class="flex-shrink-0">
+            <path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path>
+          </svg>
+          <span class="truncate"><%= req.translations.createNewNode %></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Status Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 my-6">
+      <div class="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 rounded-xl p-5 border border-neutral-800 shadow-lg backdrop-blur-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-neutral-400">Total Nodes</p>
+            <h3 class="text-3xl font-bold text-white mt-1"><%= nodes.length %></h3>
+          </div>
+          <div class="bg-emerald-500/10 p-3 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-emerald-500">
+              <path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.65a16,16,0,0,1-16.2.3A15.86,15.86,0,0,1,64,216.13V39.87a15.86,15.86,0,0,1,8.12-13.82,16,16,0,0,1,16.2.3L232.4,114.49A15.74,15.74,0,0,1,240,128Z"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="mt-4 flex items-center">
+          <span class="flex h-2 w-2 mr-2">
+            <span class="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="text-sm text-neutral-400"><%= nodes.filter(node => node.status === 'Online').length %> Online</span>
+        </div>
+      </div>
+
+      <div class="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 rounded-xl p-5 border border-neutral-800 shadow-lg backdrop-blur-sm">
+        <div class="flex items-center justify-between">
+          <div>
+            <p class="text-sm font-medium text-neutral-400">Server Count</p>
+            <h3 class="text-3xl font-bold text-white mt-1"><%= Object.values(set).reduce((a, b) => a + b, 0) %></h3>
+          </div>
+          <div class="bg-blue-500/10 p-3 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 256 256" class="text-blue-500">
+              <path d="M224,152v40a16,16,0,0,1-16,16H48a16,16,0,0,1-16-16V152a16,16,0,0,1,16-16H208A16,16,0,0,1,224,152ZM48,120A16,16,0,0,0,32,104V64a16,16,0,0,1,16-16H208a16,16,0,0,1,16,16V96a16,16,0,0,1-16,16Z"></path>
+            </svg>
+          </div>
+        </div>
+        <% if (nodes.length > 0) { %>
+          <p class="text-sm text-neutral-400 mt-4">Avg. Density: <%= (Object.values(set).reduce((a, b) => a + b, 0) / nodes.length).toFixed(2) %></p>
+        <% } else { %>
+          <p class="text-sm text-neutral-400 mt-4">No nodes available</p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Success Messages -->
+    <% if (req.query.err == "none") { %>
+      <div class="mb-6">
+        <div class="rounded-lg bg-emerald-900/30 border border-emerald-800/50 p-4 backdrop-blur-sm">
+          <div class="flex items-start">
+            <div class="flex-shrink-0 mt-0.5">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-emerald-400">
+                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+              </svg>                
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-emerald-400">Success!</h3>
+              <div class="text-sm text-emerald-400/80 mt-1">
+                <p>The action was successfully completed.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (req.query.err == "EDITED") { %>
+      <div class="mb-6">
+        <div class="rounded-lg bg-emerald-900/30 border border-emerald-800/50 p-4 backdrop-blur-sm">
+          <div class="flex items-start">
+            <div class="flex-shrink-0 mt-0.5">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 text-emerald-400">
+                <path fill-rule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clip-rule="evenodd" />
+              </svg>                
+            </div>
+            <div class="ml-3">
+              <h3 class="text-sm font-medium text-emerald-400">Success!</h3>
+              <div class="text-sm text-emerald-400/80 mt-1">
+                <p>The node was edited successfully.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- Nodes Table -->
+    <div class="overflow-x-auto rounded-xl border border-neutral-800 shadow-lg bg-neutral-900/30 backdrop-blur-sm" id="nodeTable">
+      <table class="min-w-full divide-y divide-neutral-800">
+        <thead class="bg-neutral-900/50">
+          <tr>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider"><%= req.translations.name %></th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider"><%= req.translations.connection %></th>
+            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider"><%= req.translations.instances %></th>
+            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-neutral-300 uppercase tracking-wider"><%= req.translations.actions %></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-neutral-800">
+          <% nodes.forEach(function(node) { %>
+            <tr class="hover:bg-neutral-900/50 transition-colors duration-150 cursor-pointer" onclick="handleRowClick(event, '/admin/node/<%= node.id %>/stats')">
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center">
+                    <% if (node.status == "Online") { %>
+                      <div class="relative">
+                        <span class="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+                      </div>
+                    <% } else if (node.status == "Offline") { %>
+                      <span class="relative inline-flex rounded-full h-3 w-3 bg-neutral-500"></span>
+                    <% } else { %>
+                      <div class="relative">
+                        <span class="animate-ping absolute inline-flex h-3 w-3 rounded-full bg-amber-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-3 w-3 bg-amber-500"></span>
+                      </div>
+                    <% } %>
+                  </div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-white"><%= node.name %></div>
+                    <div class="text-xs text-neutral-400"><%= node.tags %></div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="flex flex-col">
+                  <div class="text-sm font-mono text-neutral-300"><%= node.address %><span class="text-neutral-500">:<%= node.port %></span></div>
+                  <div class="mt-1 inline-flex items-center rounded-md 
+                    <%= node.versionRelease ? 'bg-emerald-600/10 text-emerald-400 ring-emerald-600/20' : 'bg-red-600/10 text-red-400 ring-red-600/20' %> 
+                    px-2 py-0.5 text-xs font-medium ring-1 ring-inset max-w-max">
+                    <%= node.versionRelease || 'unknown' %>
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap">
+                <div class="text-sm text-neutral-300"><%= set[node.id] || 0 %></div>
+              </td>
+              <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                <div class="flex justify-end gap-2">
+                  <button onclick="event.stopPropagation(); configure('<%= node.id %>')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                    Configure
+                  </button>
+                  <a href="./node/<%= node.id %>" onclick="event.stopPropagation()" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg shadow-sm text-white bg-neutral-700 hover:bg-neutral-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-neutral-500">
+                    Edit
+                  </a>
+                  <button onclick="event.stopPropagation(); deletenode('<%= node.id %>')" class="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-lg shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    Remove
+                  </button>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Node Creation Form (Hidden by default) -->
+    <div id="nodeForm" class="hidden mt-6">
+      <div class="bg-gradient-to-br from-neutral-900/50 to-neutral-800/50 rounded-xl p-6 border border-neutral-800 shadow-lg backdrop-blur-sm max-w-3xl mx-auto">
+        <h2 class="text-xl font-bold text-white mb-6">Create New Node</h2>
+        <form class="space-y-6">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label for="nodeName" class="block text-sm font-medium text-neutral-300 mb-1">Node Name</label>
+              <input id="nodeName" type="text" class="w-full px-4 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="My Node">
+            </div>
+
+            <div>
+              <label for="nodeRam" class="block text-sm font-medium text-neutral-300 mb-1">RAM (GB)</label>
+              <input id="nodeRam" type="number" class="w-full px-4 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="For informational purposes">
+            </div>
+
+            <div>
+              <label for="nodeDisk" class="block text-sm font-medium text-neutral-300 mb-1">Disk Space (GB)</label>
+              <input id="nodeDisk" type="number" class="w-full px-4 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="For informational purposes">
+            </div>
+
+            <div>
+              <label for="nodeProcessor" class="block text-sm font-medium text-neutral-300 mb-1">CPU Cores</label>
+              <input id="nodeProcessor" type="text" class="w-full px-4 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="For informational purposes">
+            </div>
+
+            <div>
+              <label for="nodeAddress" class="block text-sm font-medium text-neutral-300 mb-1">IP Address / Hostname</label>
+              <input id="nodeAddress" type="text" class="w-full px-4 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="192.168.1.1 or node.example.com">
+            </div>
+
+            <div>
+              <label for="nodePort" class="block text-sm font-medium text-neutral-300 mb-1">Cryptalis Port</label>
+              <input id="nodePort" type="number" class="w-full px-4 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="3002" value="3002">
+            </div>
+
+            <div class="md:col-span-2">
+              <label for="tagInput" class="block text-sm font-medium text-neutral-300 mb-1">Location</label>
+              <div id="tagContainer" class="flex flex-wrap gap-2 mb-2"></div>
+              <input id="tagInput" type="text" class="w-full px-4 py-2 rounded-lg bg-neutral-800 border border-neutral-700 text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent" placeholder="Add tags (press Enter after each)">
+              <p class="mt-1 text-xs text-neutral-500">Press Enter or comma to add location name</p>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-3 pt-4">
+            <button type="button" id="cancelFormBtn" class="px-4 py-2 rounded-lg border border-neutral-700 text-neutral-300 hover:bg-neutral-800 transition-colors duration-200">
+              Cancel
+            </button>
+            <button type="button" id="createNodeBtn" class="px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-500 transition-colors duration-200">
+              Create Node
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="notification" class="fixed bottom-5 right-5 bg-neutral-800 text-white px-4 py-3 rounded-lg shadow-xl transform transition-all duration-300 translate-y-full opacity-0 flex items-center gap-2 border border-neutral-700 backdrop-blur-sm z-50">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256" class="text-emerald-400">
+      <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path>
+    </svg>
+    <span>Command copied to clipboard!</span>
+  </div>
+</main>
+
+<script>
+  // Improved mobile responsiveness
+  function checkMobile() {
+    if (window.innerWidth < 640) {
+      document.body.classList.add('mobile-view');
+    } else {
+      document.body.classList.remove('mobile-view');
+    }
+  }
+
+  window.addEventListener('resize', checkMobile);
+  checkMobile();
+
+  async function radarcheck() {
+    try {
+      const response = await fetch('/admin/nodes/radar/check', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (response.ok) {
+        showToast('Radar scan initiated successfully');
+      } else {
+        showToast('Failed to initiate radar scan', 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Network error during radar scan', 'error');
+    }
+  }
+
+  function handleRowClick(event, url) {
+    // Ignore clicks on buttons, links, or form elements
+    if (event.target.tagName === 'BUTTON' || 
+        event.target.tagName === 'A' || 
+        event.target.tagName === 'INPUT' || 
+        event.target.tagName === 'SELECT' || 
+        event.target.tagName === 'TEXTAREA') {
+      return;
+    }
+
+    // Check if click originated from a button or link
+    let element = event.target;
+    while (element !== null && element !== this) {
+      if (element.tagName === 'BUTTON' || element.tagName === 'A') {
+        return;
+      }
+      element = element.parentElement;
+    }
+
+    window.location = url;
+  }
+
+  async function deletenode(nodeId) {
+    try {
+      let response = await fetch('/nodes/delete', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nodeId })
+      });
+
+      let result = await response.json();
+
+      if (response.ok) {
+        showToast('Node successfully deleted');
+        setTimeout(() => window.location.reload(), 1500);
+      } else if (result.error === "There are instances on the node") {
+        const confirmDelete = confirm('There are still instances on this node. Do you want to delete all instances and remove the node?');
+
+        if (confirmDelete) {
+          response = await fetch(`/nodes/delete?deleteinstances=true`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ nodeId })
+          });
+
+          result = await response.json();
+
+          if (response.ok) {
+            showToast('Node and instances successfully deleted');
+            setTimeout(() => window.location.reload(), 1500);
+          } else {
+            showToast('Failed to delete node', 'error');
+          }
+        }
+      } else {
+        showToast(result.error || 'Failed to delete node', 'error');
+      }
+    } catch (error) {
+      console.error('Request failed:', error);
+      showToast('Network error while deleting node', 'error');
+    }
+  }
+
+  // Toggle between table and form views
+  document.getElementById('createButton').addEventListener('click', function() {
+    document.getElementById('nodeTable').classList.add('hidden');
+    document.getElementById('nodeForm').classList.remove('hidden');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  document.getElementById('cancelFormBtn').addEventListener('click', function() {
+    document.getElementById('nodeTable').classList.remove('hidden');
+    document.getElementById('nodeForm').classList.add('hidden');
+  });
+
+  // Toast notification
+  function showToast(message, type = 'success') {
+    const toast = document.getElementById('notification');
+    toast.innerHTML = `
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 256 256" class="${type === 'success' ? 'text-emerald-400' : 'text-red-400'}">
+        ${type === 'success' ? 
+          '<path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path>' :
+          '<path d="M205.66,194.34a8,8,0,0,1-11.32,11.32L128,139.31,61.66,205.66a8,8,0,0,1-11.32-11.32L116.69,128,50.34,61.66A8,8,0,0,1,61.66,50.34L128,116.69l66.34-66.35a8,8,0,0,1,11.32,11.32L139.31,128Z"></path>'
+        }
+      </svg>
+      <span>${message}</span>
+    `;
+
+    toast.classList.remove('translate-y-full', 'opacity-0');
+    toast.classList.add('translate-y-0', 'opacity-100');
+
+    setTimeout(() => {
+      toast.classList.remove('translate-y-0', 'opacity-100');
+      toast.classList.add('translate-y-full', 'opacity-0');
+    }, 3000);
+  }
+
+  // Configure node modal
+  async function configure(nodeId) {
+    try {
+      const response = await fetch(`/admin/node/${nodeId}/configure-command`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch configure command');
+      }
+      const data = await response.json();
+      showConfigureModal(data.configureCommand);
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Failed to get configuration command', 'error');
+    }
+  }
+
+  function showConfigureModal(command) {
+    const overlay = document.createElement('div');
+    overlay.className = 'fixed inset-0 bg-black bg-opacity-70 z-50 flex justify-center items-center transition-opacity duration-300 opacity-0 backdrop-blur-sm';
+    overlay.id = 'modal-overlay';
+
+    const popup = document.createElement('div');
+    popup.className = 'bg-neutral-900 border border-neutral-800 rounded-xl shadow-2xl p-6 max-w-2xl w-full mx-4 transform transition-all duration-300 scale-95 opacity-0';
+    popup.innerHTML = `
+      <div class="text-center mb-6">
+        <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-emerald-900/20 mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" viewBox="0 0 256 256" class="text-emerald-500">
+            <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path>
+          </svg>
+        </div>
+        <h2 class="text-2xl font-bold text-white mb-2">Token Created</h2>
+        <p class="text-neutral-400">To auto-configure your node, run the following command:</p>
+      </div>
+      <div class="relative mb-6">
+        <pre class="bg-neutral-800 p-4 rounded-lg overflow-x-auto"><code id="commandCode" class="text-emerald-400 font-mono text-sm">${command}</code></pre>
+        <button id="copyBtn" class="absolute top-2 right-2 p-1 rounded-md bg-neutral-700 hover:bg-neutral-600 transition-colors" title="Copy to clipboard">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256" class="text-neutral-300">
+            <path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"></path>
+          </svg>
+        </button>
+      </div>
+      <div class="flex justify-end">
+        <button id="doneBtn" class="px-4 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white transition-colors">
+          Close
+        </button>
+      </div>
+    `;
+
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+    document.body.style.overflow = 'hidden';
+
+    // Fade in the overlay and scale up the popup
+    setTimeout(() => {
+      overlay.classList.remove('opacity-0');
+      popup.classList.remove('scale-95', 'opacity-0');
+    }, 10);
+
+    const copyBtn = document.getElementById('copyBtn');
+    const doneBtn = document.getElementById('doneBtn');
+
+    copyBtn.addEventListener('click', function() {
+      navigator.clipboard.writeText(command).then(() => {
+        copyBtn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256" class="text-emerald-400">
+            <path d="M229.66,77.66l-128,128a8,8,0,0,1-11.32,0l-56-56a8,8,0,0,1,11.32-11.32L96,188.69,218.34,66.34a8,8,0,0,1,11.32,11.32Z"></path>
+          </svg>
+        `;
+        setTimeout(() => {
+          copyBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 256 256" class="text-neutral-300">
+              <path d="M216,32H88a8,8,0,0,0-8,8V80H40a8,8,0,0,0-8,8V216a8,8,0,0,0,8,8H168a8,8,0,0,0,8-8V176h40a8,8,0,0,0,8-8V40A8,8,0,0,0,216,32ZM160,208H48V96H160Zm48-48H176V88a8,8,0,0,0-8-8H96V48H208Z"></path>
+            </svg>
+          `;
+        }, 2000);
+      });
+    });
+
+    doneBtn.addEventListener('click', closePopup);
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) closePopup();
+    });
+
+    function closePopup() {
+      overlay.classList.add('opacity-0');
+      popup.classList.add('scale-95', 'opacity-0');
+      setTimeout(() => {
+        document.body.removeChild(overlay);
+        document.body.style.overflow = '';
+      }, 300);
+    }
+  }
+
+  // Tag management
+  function setupBadgeInput(inputId, containerId) {
+    const input = document.getElementById(inputId);
+    const container = document.getElementById(containerId);
+    let tags = [];
+
+    function addTag(tag) {
+      if (!tag || tags.includes(tag)) return;
+
+      tags.push(tag);
+      renderTags();
+    }
+
+    function removeTag(tag) {
+      tags = tags.filter(t => t !== tag);
+      renderTags();
+    }
+
+    function renderTags() {
+      container.innerHTML = '';
+      tags.forEach(tag => {
+        const badge = document.createElement('div');
+        badge.className = 'inline-flex items-center bg-neutral-800 text-neutral-300 text-xs px-3 py-1 rounded-full border border-neutral-700';
+        badge.innerHTML = `
+          ${tag}
+          <button type="button" class="ml-2 text-neutral-400 hover:text-white" data-tag="${tag}">
+            &times;
+          </button>
+        `;
+        container.appendChild(badge);
+      });
+
+      // Add event listeners to remove buttons
+      container.querySelectorAll('button').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          removeTag(e.target.getAttribute('data-tag'));
+        });
+      });
+    }
+
+    input.addEventListener('keydown', (e) => {
+      if (['Enter', ','].includes(e.key)) {
+        e.preventDefault();
+        const tag = input.value.trim();
+        if (tag) addTag(tag);
+        input.value = '';
+      }
+    });
+
+    input.addEventListener('blur', () => {
+      const tag = input.value.trim();
+      if (tag) addTag(tag);
+      input.value = '';
+    });
+
+    // Expose tags for form submission
+    return {
+      getTags: () => tags,
+      clearTags: () => {
+        tags = [];
+        renderTags();
+      }
+    };
+  }
+
+  const tagManager = setupBadgeInput('tagInput', 'tagContainer');
+
+  // Form submission
+  document.getElementById('createNodeBtn').addEventListener('click', async function() {
+    const name = document.getElementById('nodeName').value.trim();
+    const ram = document.getElementById('nodeRam').value.trim();
+    const disk = document.getElementById('nodeDisk').value.trim();
+    const processor = document.getElementById('nodeProcessor').value.trim();
+    const address = document.getElementById('nodeAddress').value.trim();
+    const port = document.getElementById('nodePort').value.trim();
+    const tags = tagManager.getTags().join(', ');
+
+    if (!name || !address || !port) {
+      showToast('Please fill in all required fields', 'error');
+      return;
+    }
+
+    const nodeData = {
+      name,
+      tags,
+      ram,
+      disk,
+      processor,
+      address,
+      port
+    };
+
+    try {
+      const response = await fetch('/nodes/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(nodeData)
+      });
+
+      if (response.ok) {
+        showToast('Node created successfully');
+        setTimeout(() => {
+          window.location.href = '../admin/nodes?err=none';
+        }, 1500);
+      } else {
+        const error = await response.json();
+        showToast(error.message || 'Failed to create node', 'error');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      showToast('Network error while creating node', 'error');
+    }
+  });
+</script>
+
+<style>
+  /* Smooth transitions and animations */
+  .clickable-row {
+    transition: background-color 0.2s ease;
+  }
+
+  .clickable-row:hover {
+    background-color: rgba(255, 255, 255, 0.03);
+  }
+
+  /* Better scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Mobile optimizations */
+  @media (max-width: 640px) {
+    .mobile-view table {
+      display: block;
+      width: 100%;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .mobile-view .flex-col {
+      flex-direction: column;
+    }
+
+    .mobile-view .gap-3 {
+      gap: 0.5rem;
+    }
+
+    .mobile-view .px-6 {
+      padding-left: 1rem;
+      padding-right: 1rem;
+    }
+
+    .mobile-view .py-4 {
+      padding-top: 0.75rem;
+      padding-bottom: 0.75rem;
+    }
+  }
+</style>

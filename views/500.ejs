@@ -1,0 +1,166 @@
+    <%- include('components/template') %>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs/loader.js"></script>
+
+    <main id="content" class="min-h-screen bg-gradient-to-br from-gray-900 to-gray-800">
+        <div class="container mx-auto px-4 py-6 max-w-6xl">
+            <!-- Header Section with improved spacing -->
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
+                <div class="flex-1 min-w-0">
+                    <h1 class="text-2xl md:text-3xl font-bold text-white truncate"><%= req.translations.manageInstance %></h1>
+                    <p class="mt-2 text-gray-400 text-sm md:text-base"><%= req.translations.instanceViewDetailText %></p>
+                </div>
+                <!-- Action buttons with better mobile handling -->
+                <div class="flex gap-2 md:gap-3 flex-shrink-0">
+                    <button class="px-3 py-2 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors whitespace-nowrap">
+                        <span class="hidden md:inline">Refresh</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 md:hidden" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Instance Component with better spacing -->
+            <div class="mb-8 md:mb-10">
+                <%- include('components/instance') %>
+            </div>
+
+            <!-- Enhanced Error Display Section -->
+            <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-4 md:p-6 backdrop-blur-sm">
+                <div class="flex items-center gap-3 mb-4">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-red-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div>
+                        <h2 class="text-lg font-semibold text-red-400"><%= req.translations.fivezerozeroInstanceError %></h2>
+                        <p class="text-gray-300 text-sm mt-1"><%= req.translations.somethingWentWrongThere %></p>
+                    </div>
+                </div>
+
+                <!-- Improved error code display -->
+                <div class="bg-gray-900 rounded-md p-3 md:p-4 mt-4 overflow-x-auto">
+                    <p class="text-gray-400 text-sm mb-2"><%= req.translations.returnedTextError %></p>
+                    <pre class="text-red-300 font-mono text-xs md:text-sm bg-gray-800 p-3 rounded-md overflow-x-auto">
+                        <code><%= error || req.translations.informationAvailableError %></code>
+                    </pre>
+                </div>
+
+                <!-- Suggested Actions with better mobile layout -->
+                <div class="mt-6 pt-4 border-t border-gray-700">
+                    <h3 class="text-sm font-medium text-gray-400 mb-3">SUGGESTED ACTIONS:</h3>
+                    <div class="grid grid-cols-2 md:flex gap-2 md:gap-3">
+                        <button class="px-3 py-2 md:px-4 md:py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 11-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Refresh</span>
+                        </button>
+                        <button class="px-3 py-2 md:px-4 md:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd" />
+                            </svg>
+                            <span>Logs</span>
+                        </button>
+                        <button class="col-span-2 md:col-auto px-3 py-2 md:px-4 md:py-2 bg-gray-700 hover:bg-gray-600 text-white rounded-md text-sm font-medium transition-colors flex items-center justify-center gap-1">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
+                                <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
+                            </svg>
+                            <span>Contact Support</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <%- include('components/footer') %>
+
+    <style>
+        /* Enhanced transitions and interactions */
+        button, a, input, select {
+            transition: all 0.2s ease-out;
+            outline: none;
+        }
+
+        button:focus, a:focus {
+            outline: 2px solid rgba(59, 130, 246, 0.5);
+            outline-offset: 2px;
+        }
+
+        /* Better code block styling with line wrapping */
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            font-family: 'Fira Code', 'Courier New', monospace;
+        }
+
+        /* Improved scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.05);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Mobile-specific optimizations */
+        @media (max-width: 768px) {
+            #content {
+                padding-top: 1rem;
+                padding-bottom: 1rem;
+            }
+
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        /* Prevent layout shift when loading */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Better focus states for accessibility */
+        [tabindex]:focus-visible, button:focus-visible {
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.5);
+        }
+    </style>
+
+    <script>
+        // Add any necessary JavaScript enhancements here
+        document.addEventListener('DOMContentLoaded', function() {
+            // Mobile menu toggle if needed
+            // Error handling enhancements
+            // Any other interactive elements
+
+            // Example: Add click handler for buttons
+            document.querySelectorAll('button').forEach(button => {
+                button.addEventListener('click', function(e) {
+                    if (this.disabled) return;
+
+                    // Add ripple effect
+                    const ripple = document.createElement('span');
+                    ripple.classList.add('ripple');
+                    this.appendChild(ripple);
+
+                    // Remove ripple after animation
+                    setTimeout(() => {
+                        ripple.remove();
+                    }, 600);
+                });
+            });
+        });
+    </script>

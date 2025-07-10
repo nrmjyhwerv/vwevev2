@@ -1,0 +1,333 @@
+<%- include('../components/admin_template') %>
+<main id="content" class="p-4 md:p-6 h-screen w-screen flex flex-col">
+  <div class="bg-gradient-to-br from-gray-800 to-gray-900 p-4 md:p-6 rounded-xl shadow-2xl flex-1 overflow-auto backdrop-blur-sm">
+    <!-- Header Section -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between mb-4 md:mb-6">
+      <div class="mb-3 md:mb-0">
+        <h1 class="text-xl md:text-2xl font-bold text-white"><%= req.translations.APIKeys %></h1>
+        <p class="text-xs md:text-sm text-gray-400 mt-1">Manage your API keys for authentication</p>
+      </div>
+      <button id="createButton" type="button" class="px-3 py-2 md:px-4 md:py-2.5 text-xs md:text-sm font-medium text-white bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg hover:from-blue-600 hover:to-blue-700 focus:ring-2 focus:ring-blue-500 transition-all duration-200 hover:shadow-lg flex items-center gap-1 md:gap-2 w-full md:w-auto justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+        </svg>
+        <%= req.translations.createNewAPIKey %>
+      </button>
+    </div>
+
+    <!-- Status Messages -->
+    <% if (req.query.err == "CREATED") { %>
+      <div class="mt-3 bg-gradient-to-r from-green-900/30 to-green-800/30 border-l-4 border-green-400 text-green-100 px-3 py-2 md:px-4 md:py-3 rounded-lg flex items-start gap-2 md:gap-3 mb-4 md:mb-6 animate-fade-in">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5 mt-0.5 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+        </svg>
+        <div>
+          <p class="font-semibold text-sm md:text-base">API Key Created</p>
+          <p class="text-xs md:text-sm opacity-80">The API Key has been created successfully.</p>
+        </div>
+      </div>
+    <% } %>
+
+    <% if (req.query.err == "DELETED") { %>
+      <div class="mt-3 bg-gradient-to-r from-red-900/30 to-red-800/30 border-l-4 border-red-400 text-red-100 px-3 py-2 md:px-4 md:py-3 rounded-lg flex items-start gap-2 md:gap-3 mb-4 md:mb-6 animate-fade-in">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5 mt-0.5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+        <div>
+          <p class="font-semibold text-sm md:text-base">API Key Deleted</p>
+          <p class="text-xs md:text-sm opacity-80">The API Key has been deleted successfully.</p>
+        </div>
+      </div>
+    <% } %>
+
+    <!-- API Keys Table -->
+    <div id="nodeTable" class="mt-4 md:mt-6 overflow-auto rounded-xl border border-gray-700 shadow-sm animate-slide-in-up">
+      <table class="w-full text-xs md:text-sm text-left text-gray-300 divide-y divide-gray-700">
+        <thead class="bg-gray-700/80 backdrop-blur-sm">
+          <tr>
+            <th class="px-3 py-2 md:px-6 md:py-3.5 font-medium">ID</th>
+            <th class="px-3 py-2 md:px-6 md:py-3.5 font-medium">Key</th>
+            <th class="px-3 py-2 md:px-6 md:py-3.5 font-medium">Created</th>
+            <th class="px-3 py-2 md:px-6 md:py-3.5 font-medium text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-700/50">
+          <% if (apiKeys.length === 0) { %>
+            <tr>
+              <td colspan="4" class="px-3 py-4 md:px-6 md:py-4 text-center text-gray-400">
+                No API keys found. Create your first API key to get started.
+              </td>
+            </tr>
+          <% } %>
+
+          <% apiKeys.forEach(function(key) { %>
+            <tr class="hover:bg-gray-700/30 transition-colors duration-150">
+              <td class="px-3 py-2 md:px-6 md:py-4 font-mono text-xs md:text-sm"><%= key.id %></td>
+              <td class="px-3 py-2 md:px-6 md:py-4">
+                <div class="inline-flex items-center gap-1 md:gap-2">
+                  <span class="bg-gray-700/60 text-gray-200 px-2 py-1 md:px-3 md:py-1.5 rounded-lg font-mono text-xs truncate max-w-[100px] md:max-w-none">
+                    <%= key.key %>
+                  </span>
+                  <button class="text-gray-400 hover:text-gray-200 transition-colors" onclick="copyToClipboard('<%= key.key %>')">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 md:h-4 md:w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M8 3a1 1 0 011-1h2a1 1 0 110 2H9a1 1 0 01-1-1z" />
+                      <path d="M6 3a2 2 0 00-2 2v11a2 2 0 002 2h8a2 2 0 002-2V5a2 2 0 00-2-2 3 3 0 01-3 3H9a3 3 0 01-3-3z" />
+                    </svg>
+                  </button>
+                </div>
+              </td>
+              <td class="px-3 py-2 md:px-6 md:py-4 text-gray-400 text-xs md:text-sm"><%= new Date(key.createdAt).toLocaleDateString() %></td>
+              <td class="px-3 py-2 md:px-6 md:py-4 text-right">
+                <button class="px-2.5 py-1 md:px-3.5 md:py-1.5 text-xs font-medium text-white bg-gradient-to-r from-red-500 to-red-600 rounded-lg hover:from-red-600 hover:to-red-700 removeButton transition-all duration-200 flex items-center gap-1 ml-auto" data-keyid="<%= key.id %>">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 md:h-3.5 md:w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                  </svg>
+                  <%= req.translations.remove %>
+                </button>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Create API Key Form (Hidden Initially) -->
+    <div id="nodeForm" class="mt-4 md:mt-6 hidden animate-fade-in">
+      <div class="bg-gray-800/50 border border-gray-700 rounded-xl p-4 md:p-6 shadow-lg backdrop-blur-sm">
+        <h2 class="text-base md:text-lg font-semibold text-white mb-3 md:mb-4">Create New API Key</h2>
+        <p class="text-xs md:text-sm text-gray-400 mb-4 md:mb-6">This will generate a new API key with full access permissions. Make sure to store it securely.</p>
+
+        <div class="flex flex-col sm:flex-row gap-3 md:gap-4">
+          <button id="createNodeBtn" type="button" class="px-4 py-2 md:px-6 md:py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg hover:from-green-600 hover:to-green-700 transition-all duration-200 font-medium flex items-center justify-center gap-1 md:gap-2 flex-1 text-xs md:text-sm">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 md:h-5 md:w-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd" />
+            </svg>
+            <%= req.translations.clickToConfirmCreation %>
+          </button>
+
+          <button id="cancelButton" type="button" class="px-4 py-2 md:px-6 md:py-3 bg-gray-700/50 text-gray-300 rounded-lg hover:bg-gray-700 transition-all duration-200 font-medium flex items-center justify-center gap-1 md:gap-2 flex-1 border border-gray-600 text-xs md:text-sm">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  // Improved copy to clipboard function with feedback
+  function copyToClipboard(text) {
+    navigator.clipboard.writeText(text).then(() => {
+      // Show toast notification
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-4 right-4 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm flex items-center gap-2 z-50 animate-fade-in';
+      toast.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+        </svg>
+        Copied to clipboard!
+      `;
+      document.body.appendChild(toast);
+
+      // Remove toast after 3 seconds
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+        setTimeout(() => toast.remove(), 300);
+      }, 3000);
+    }).catch(err => {
+      console.error('Failed to copy: ', err);
+      alert('Failed to copy API key to clipboard');
+    });
+  }
+
+  // Create API Key
+  document.getElementById("createButton").addEventListener("click", function () {
+    document.getElementById("nodeTable").classList.add("hidden");
+    document.getElementById("nodeForm").classList.remove("hidden");
+    // Scroll to form for better mobile UX
+    document.getElementById("nodeForm").scrollIntoView({ behavior: 'smooth' });
+  });
+
+  // Cancel button
+  document.getElementById("cancelButton")?.addEventListener("click", function () {
+    document.getElementById("nodeTable").classList.remove("hidden");
+    document.getElementById("nodeForm").classList.add("hidden");
+    // Scroll back to top for better mobile UX
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+
+  // Create API Key button
+  document.getElementById("createNodeBtn")?.addEventListener("click", function () {
+    const btn = this;
+    const originalText = btn.innerHTML;
+
+    btn.innerHTML = `
+      <svg class="animate-spin -ml-1 mr-1 h-4 w-4 md:h-5 md:w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+      </svg>
+      Creating...
+    `;
+    btn.disabled = true;
+
+    fetch("/apikeys/create", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      }
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error("Failed to create API Key");
+      }
+      return response.json();
+    })
+    .then(data => {
+      window.location.href = '/admin/apikeys?err=CREATED';
+    })
+    .catch(error => {
+      // Show error toast
+      const toast = document.createElement('div');
+      toast.className = 'fixed bottom-4 right-4 bg-red-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm flex items-center gap-2 z-50 animate-fade-in';
+      toast.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-300" viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+        </svg>
+        Failed to create API Key: ${error.message}
+      `;
+      document.body.appendChild(toast);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+        setTimeout(() => toast.remove(), 300);
+      }, 5000);
+
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    });
+  });
+
+  // Delete API Key
+  document.querySelectorAll('.removeButton').forEach(button => {
+    button.addEventListener('click', function() {
+      if (!confirm('<%= req.translations.confirmAPIKeyDeletion %>')) return;
+
+      const keyId = this.dataset.keyid;
+      const row = this.closest('tr');
+      const originalText = this.innerHTML;
+
+      // Add loading state
+      this.innerHTML = `
+        <svg class="animate-spin -ml-1 mr-1 h-3 w-3 md:h-3.5 md:w-3.5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+        Deleting...
+      `;
+      this.disabled = true;
+
+      fetch('/apikeys/delete', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ keyId })
+      })
+      .then(response => {
+        if (response.ok) {
+          // Animate row removal
+          row.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+          setTimeout(() => {
+            window.location.href = '../admin/apikeys?err=DELETED';
+          }, 300);
+        } else {
+          throw new Error('Failed to delete API Key');
+        }
+      })
+      .catch(error => {
+        // Show error toast
+        const toast = document.createElement('div');
+        toast.className = 'fixed bottom-4 right-4 bg-red-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm flex items-center gap-2 z-50 animate-fade-in';
+        toast.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-red-300" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+          </svg>
+          Failed to delete API Key: ${error.message}
+        `;
+        document.body.appendChild(toast);
+
+        setTimeout(() => {
+          toast.classList.add('opacity-0', 'transition-opacity', 'duration-300');
+          setTimeout(() => toast.remove(), 300);
+        }, 5000);
+
+        this.innerHTML = originalText;
+        this.disabled = false;
+      });
+    });
+  });
+
+  // Better mobile menu toggle
+  document.addEventListener('DOMContentLoaded', function() {
+    // Close mobile menu when clicking on a link
+    const navLinks = document.querySelectorAll('.mobile-nav a');
+    navLinks.forEach(link => {
+      link.addEventListener('click', () => {
+        const menu = document.getElementById('mobile-menu');
+        if (menu) {
+          menu.classList.add('hidden');
+        }
+      });
+    });
+  });
+</script>
+
+<style>
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes slide-in-up {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  @keyframes slide-in-left {
+    from { transform: translateX(-20px); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+  }
+
+  .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
+  .animate-slide-in-up { animation: slide-in-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .animate-slide-in-left { animation: slide-in-left 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+  }
+
+  /* Responsive table cells */
+  @media (max-width: 640px) {
+    table {
+      display: block;
+      width: 100%;
+      overflow-x: auto;
+    }
+
+    td, th {
+      white-space: nowrap;
+      min-width: 100px;
+    }
+  }
+</style>

@@ -1,0 +1,313 @@
+<%- include('../components/template') %>
+<main id="content" class="pb-8">
+    <!-- Header Section -->
+    <div class="bg-transparent px-4 sm:px-6 lg:px-8 pt-6 pb-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-semibold text-white">Instance Management</h1>
+                <p class="mt-1 text-sm text-neutral-400">View, update, and manage your instance on Cryptalis</p>
+            </div>
+            <button id="createDatabaseButton" type="button" class="flex items-center justify-center rounded-lg <%= theme['button-color'] %> px-4 py-2.5 text-sm font-medium shadow-lg transition-all hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                </svg>
+                Create Database
+            </button>
+        </div>
+    </div>
+
+    <!-- Instance Info Card -->
+    <div class="px-4 sm:px-6 lg:px-8 mb-6">
+        <%- include('../components/instance') %>
+    </div>
+
+    <!-- Database Section -->
+    <div class="px-4 sm:px-6 lg:px-8">
+        <div class="bg-neutral-900/50 rounded-xl shadow-lg overflow-hidden">
+            <!-- Table Header -->
+            <div class="px-4 py-5 sm:px-6 border-b border-neutral-800">
+                <h3 class="text-lg font-medium leading-6 text-white">Databases</h3>
+                <p class="mt-1 text-sm text-neutral-400">List of all databases in this instance</p>
+            </div>
+
+            <!-- Responsive Table -->
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-neutral-800">
+                    <thead class="bg-neutral-800/50">
+                        <tr>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Host</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">User</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Password</th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-neutral-300 uppercase tracking-wider">Database</th>
+                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-neutral-300 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-transparent divide-y divide-neutral-800">
+                        <% databases.forEach(function(database, index) { %>
+                            <tr class="hover:bg-neutral-800/30 transition-colors duration-150">
+                                <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-white">
+                                    <%= database.host %>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-300">
+                                    <%= database.userName %>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-300">
+                                    <div class="relative group">
+                                        <span class="blur-sm group-hover:blur-none transition-all duration-200 cursor-pointer" 
+                                              onclick="copyToClipboard('<%- database.password %>')">
+                                            <%= database.password %>
+                                        </span>
+                                        <span class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 text-xs text-neutral-400">
+                                            Click to copy
+                                        </span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm text-neutral-300">
+                                    <%= database.dbName %>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                    <div class="flex justify-end space-x-2">
+                                        <button class="text-indigo-400 hover:text-indigo-300 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" />
+                                            </svg>
+                                        </button>
+                                        <button class="text-rose-400 hover:text-rose-300 transition-colors">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <% }); %>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Empty State -->
+            <% if (databases.length === 0) { %>
+                <div class="text-center py-12">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-neutral-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                    </svg>
+                    <h3 class="mt-2 text-sm font-medium text-white">No databases found</h3>
+                    <p class="mt-1 text-sm text-neutral-400">Get started by creating a new database.</p>
+                    <div class="mt-6">
+                        <button id="emptyStateCreateButton" type="button" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clip-rule="evenodd" />
+                            </svg>
+                            New Database
+                        </button>
+                    </div>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <!-- Create Database Modal -->
+    <div id="createDatabaseModal" class="fixed inset-0 z-50 hidden overflow-y-auto">
+        <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+            <!-- Background overlay -->
+            <div class="fixed inset-0 transition-opacity" aria-hidden="true">
+                <div class="absolute inset-0 bg-black bg-opacity-70 backdrop-blur-sm"></div>
+            </div>
+
+            <!-- Modal panel -->
+            <div class="inline-block align-bottom bg-neutral-800 rounded-xl text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+                <div class="px-6 py-5 sm:px-8 sm:py-6 bg-neutral-900">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-lg leading-6 font-medium text-white">Create New Database</h3>
+                        <button id="closeCreateDatabaseModal" type="button" class="rounded-md text-neutral-400 hover:text-white focus:outline-none">
+                            <span class="sr-only">Close</span>
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    <div class="mt-2">
+                        <p class="text-sm text-neutral-400">Enter a name for your new database. Names must be unique.</p>
+                    </div>
+                </div>
+                <form id="createDatabaseForm" action="/instance/<%= req.params.id %>/db/create" method="POST" class="px-6 py-4 sm:px-8 sm:py-6">
+                    <div class="space-y-4">
+                        <div>
+                            <label for="databaseNameInput" class="block text-sm font-medium text-neutral-300 mb-1">Database Name</label>
+                            <input type="text" id="databaseNameInput" name="databaseName" class="w-full px-4 py-2.5 bg-neutral-700 border border-neutral-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-white placeholder-neutral-400 transition" placeholder="my_new_database" required>
+                            <p class="mt-1 text-xs text-neutral-400">Only alphanumeric characters and underscores are allowed.</p>
+                        </div>
+                    </div>
+                    <div class="mt-6 flex justify-end space-x-3">
+                        <button id="cancelCreateDatabase" type="button" class="px-4 py-2.5 text-sm font-medium rounded-lg border border-neutral-600 text-neutral-300 hover:bg-neutral-700/50 hover:text-white transition-colors">
+                            Cancel
+                        </button>
+                        <button type="submit" class="px-4 py-2.5 text-sm font-medium rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-colors">
+                            Create Database
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+<%- include('../components/footer') %>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // DOM Elements
+        const createDatabaseButton = document.getElementById('createDatabaseButton');
+        const emptyStateCreateButton = document.getElementById('emptyStateCreateButton');
+        const createDatabaseModal = document.getElementById('createDatabaseModal');
+        const closeCreateDatabaseModalButton = document.getElementById('closeCreateDatabaseModal');
+        const cancelCreateDatabase = document.getElementById('cancelCreateDatabase');
+        const createDatabaseForm = document.getElementById('createDatabaseForm');
+        const databaseNameInput = document.getElementById('databaseNameInput');
+
+        // Modal functions
+        function openModal() {
+            createDatabaseModal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            setTimeout(() => {
+                databaseNameInput.focus();
+            }, 100);
+        }
+
+        function closeModal() {
+            createDatabaseModal.classList.add('hidden');
+            document.body.style.overflow = '';
+            createDatabaseForm.reset();
+        }
+
+        // Event listeners
+        createDatabaseButton.addEventListener('click', openModal);
+        if (emptyStateCreateButton) {
+            emptyStateCreateButton.addEventListener('click', openModal);
+        }
+
+        closeCreateDatabaseModalButton.addEventListener('click', closeModal);
+        cancelCreateDatabase.addEventListener('click', closeModal);
+
+        // Close modal when clicking outside
+        createDatabaseModal.addEventListener('click', function(event) {
+            if (event.target === createDatabaseModal) {
+                closeModal();
+            }
+        });
+
+        // Prevent modal from closing when clicking inside
+        createDatabaseModal.querySelector('.bg-neutral-800').addEventListener('click', function(event) {
+            event.stopPropagation();
+        });
+
+        // Form submission
+        createDatabaseForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const databaseName = databaseNameInput.value.trim();
+            if (!databaseName) return;
+
+            // Simple validation
+            if (!/^[a-zA-Z0-9_]+$/.test(databaseName)) {
+                alert('Database name can only contain letters, numbers, and underscores.');
+                return;
+            }
+
+            const actionUrl = createDatabaseForm.action + '/' + encodeURIComponent(databaseName);
+
+            // Create a temporary form for submission
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = actionUrl;
+
+            const input = document.createElement('input');
+            input.type = 'hidden';
+            input.name = 'databaseName';
+            input.value = databaseName;
+            form.appendChild(input);
+
+            document.body.appendChild(form);
+            form.submit();
+        });
+
+        // Copy to clipboard function
+        window.copyToClipboard = function(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                // Show tooltip or notification
+                const notification = document.createElement('div');
+                notification.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-green-600 text-white px-4 py-2 rounded-lg shadow-lg text-sm animate-fade-in-out';
+                notification.textContent = 'Copied to clipboard!';
+                document.body.appendChild(notification);
+
+                setTimeout(() => {
+                    notification.remove();
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+            });
+        };
+    });
+</script>
+
+<style>
+    /* Animation for fade in/out */
+    @keyframes fade-in-out {
+        0% { opacity: 0; transform: translateY(10px); }
+        10% { opacity: 1; transform: translateY(0); }
+        90% { opacity: 1; transform: translateY(0); }
+        100% { opacity: 0; transform: translateY(-10px); }
+    }
+
+    .animate-fade-in-out {
+        animation: fade-in-out 2s ease-in-out forwards;
+    }
+
+    /* Responsive table adjustments */
+    @media (max-width: 640px) {
+        table {
+            display: block;
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        thead {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border-width: 0;
+        }
+
+        tr {
+            display: block;
+            margin-bottom: 1rem;
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background-color: rgba(38, 38, 38, 0.5);
+        }
+
+        td {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.75rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        td::before {
+            content: attr(data-label);
+            font-weight: 500;
+            color: rgba(156, 163, 175, 1);
+            margin-right: 1rem;
+        }
+
+        td:last-child {
+            border-bottom: none;
+        }
+    }
+</style>

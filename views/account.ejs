@@ -1,0 +1,231 @@
+<%- include('components/template') %>
+<body class="bg-[#010103] text-gray-300 font-inter min-h-screen" x-data="{ sidebarOpen: false }" @keydown.escape="sidebarOpen = false">
+    <main class="flex-grow container mx-auto px-4 py-8">
+        <!-- Header Section -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center w-full mx-auto pb-4 gap-4">
+            <div class="flex flex-col">
+                <h1 class="text-2xl md:text-3xl font-bold text-white">Account Information</h1>
+                <p class="text-gray-400">View and manage your account credentials</p>
+            </div>
+            <nav aria-label="Breadcrumb" class="inline-flex py-2 px-4 rounded-xl bg-white/5 backdrop-blur-sm">
+                <ol class="flex items-center space-x-2">
+                    <li>
+                        <a href="#" class="text-sm text-zinc-400 hover:text-white transition-colors flex items-center gap-2">
+                            <i class="fas fa-home"></i> <span>Home</span>
+                        </a>
+                    </li>
+                    <li aria-hidden="true"><i class="fas fa-chevron-right text-zinc-400 text-xs"></i></li>
+                    <li aria-current="page">
+                        <span class="text-sm text-white font-medium">Account</span>
+                    </li>
+                </ol>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <div class="mt-8 md:mt-12 flex justify-center animate-fade-in">
+            <div class="w-full max-w-md bg-white/5 p-6 rounded-xl border border-white/10 shadow-lg backdrop-blur-sm transition-all hover:shadow-xl hover:border-white/20">
+                <!-- Profile Icon -->
+                <div class="text-center mb-6">
+                    <div class="inline-block p-4 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 animate-float">
+                        <i class="fas fa-user-circle text-5xl text-white"></i>
+                    </div>
+                </div>
+
+                <!-- Email Section -->
+                <section class="mb-8">
+                    <h2 class="text-xl font-semibold text-center mb-4">Account Credentials</h2>
+                    <div class="relative group">
+                        <label for="user-email" class="sr-only">Email address</label>
+                        <input 
+                            id="user-email"
+                            value="<%= user.email %>" 
+                            class="w-full px-4 py-3 rounded-lg bg-gray-800/70 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all" 
+                            disabled
+                            aria-label="Your email address"
+                        >
+                        <button 
+                            onclick="copyEmail()" 
+                            class="absolute right-3 top-3 text-gray-400 hover:text-white transition-colors"
+                            aria-label="Copy email to clipboard"
+                            data-tooltip="Copy email"
+                        >
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                </section>
+
+                <!-- Password Change Section -->
+                <section class="border-t border-gray-700 pt-6">
+                    <h3 class="text-lg font-semibold mb-4">Change Password</h3>
+                    <form id="change-password-form" action="/change-password" method="POST" class="space-y-4">
+                        <div>
+                            <label for="currentPassword" class="block text-sm font-medium mb-1">Current Password</label>
+                            <div class="relative">
+                                <input 
+                                    type="password" 
+                                    id="currentPassword" 
+                                    name="currentPassword"
+                                    placeholder="Enter current password" 
+                                    class="w-full px-4 py-3 rounded-lg bg-gray-800/70 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                    required
+                                    aria-required="true"
+                                >
+                                <button type="button" class="absolute right-3 top-3 text-gray-400 hover:text-white toggle-password" data-target="currentPassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label for="newPassword" class="block text-sm font-medium mb-1">New Password</label>
+                            <div class="relative">
+                                <input 
+                                    type="password" 
+                                    id="newPassword" 
+                                    name="newPassword"
+                                    placeholder="Enter new password" 
+                                    class="w-full px-4 py-3 rounded-lg bg-gray-800/70 text-white border border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
+                                    required
+                                    aria-required="true"
+                                    pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                                    aria-describedby="password-requirements"
+                                >
+                                <button type="button" class="absolute right-3 top-3 text-gray-400 hover:text-white toggle-password" data-target="newPassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <div id="password-requirements" class="mt-2 text-sm text-white/70">
+                                <p class="font-medium">Password requirements:</p>
+                                <ul class="list-disc list-inside space-y-1">
+                                    <li class="requirement-length">Minimum 8 characters</li>
+                                    <li class="requirement-uppercase">At least one uppercase letter</li>
+                                    <li class="requirement-lowercase">At least one lowercase letter</li>
+                                    <li class="requirement-number">At least one number</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <button 
+                            type="submit" 
+                            class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-3 rounded-lg hover:from-indigo-600 hover:to-purple-700 transition-all focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+                        >
+                            Update Password
+                        </button>
+                    </form>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <%- include('components/footer') %>
+
+    <script>
+        // Copy email function
+        function copyEmail() {
+            const emailInput = document.getElementById('user-email');
+            navigator.clipboard.writeText(emailInput.value)
+                .then(() => {
+                    // Show a nice toast instead of alert
+                    const toast = document.createElement('div');
+                    toast.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg animate-toast';
+                    toast.textContent = 'Email copied to clipboard!';
+                    document.body.appendChild(toast);
+                    
+                    setTimeout(() => {
+                        toast.classList.add('animate-fade-out');
+                        setTimeout(() => toast.remove(), 300);
+                    }, 2000);
+                })
+                .catch(err => {
+                    console.error('Failed to copy email: ', err);
+                });
+        }
+
+        // Password visibility toggle
+        document.querySelectorAll('.toggle-password').forEach(button => {
+            button.addEventListener('click', function() {
+                const targetId = this.getAttribute('data-target');
+                const passwordInput = document.getElementById(targetId);
+                const icon = this.querySelector('i');
+                
+                if (passwordInput.type === 'password') {
+                    passwordInput.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    passwordInput.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            });
+        });
+
+        // Password validation feedback
+        const newPassword = document.getElementById('newPassword');
+        if (newPassword) {
+            newPassword.addEventListener('input', function() {
+                const value = this.value;
+                
+                // Update requirement indicators
+                document.querySelector('.requirement-length').classList.toggle('text-green-400', value.length >= 8);
+                document.querySelector('.requirement-uppercase').classList.toggle('text-green-400', /[A-Z]/.test(value));
+                document.querySelector('.requirement-lowercase').classList.toggle('text-green-400', /[a-z]/.test(value));
+                document.querySelector('.requirement-number').classList.toggle('text-green-400', /\d/.test(value));
+            });
+        }
+    </script>
+
+    <style>
+        /* Animations */
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.6s ease-out forwards;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes toast {
+            0% { opacity: 0; transform: translateY(20px); }
+            10% { opacity: 1; transform: translateY(0); }
+            90% { opacity: 1; transform: translateY(0); }
+            100% { opacity: 0; transform: translateY(20px); }
+        }
+        .animate-toast {
+            animation: toast 2.3s ease-in-out forwards;
+        }
+        
+        @keyframes fade-out {
+            to { opacity: 0; }
+        }
+        .animate-fade-out {
+            animation: fade-out 0.3s ease-out forwards;
+        }
+
+        /* Tooltip for copy button */
+        [data-tooltip] {
+            position: relative;
+        }
+        [data-tooltip]:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</body>

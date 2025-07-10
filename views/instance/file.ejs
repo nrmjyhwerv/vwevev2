@@ -1,0 +1,283 @@
+<%- include('../components/template') %>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs/loader.js"></script>
+
+<main id="content" class="pb-10">
+  <!-- Header Section -->
+  <div class="bg-transparent">
+    <div class="sm:flex sm:items-center px-8 pt-4">
+      <div class="sm:flex-auto">
+        <h1 class="text-base font-medium leading-6 text-white">Manage Instance</h1>
+        <p class="mt-1 tracking-tight text-sm text-neutral-500">View, update and manage an instance on the Cryptalis Panel.</p>
+      </div>
+    </div>
+  </div>
+  
+  <%- include('../components/instance') %>
+  
+  <!-- File Path Breadcrumbs -->
+  <% 
+    let formattedFile = req.query.path ? '/' + req.params.file : req.params.file;
+    let query = req.query.path ? '?path=' + req.query.path : '';
+    let pathParts = req.query.path ? req.query.path.split('/') : [];
+  %>  
+  <div class="px-8 mt-4">
+    <nav class="flex items-center text-sm" aria-label="Breadcrumb">
+      <ol class="inline-flex items-center space-x-1 md:space-x-2">
+        <li class="inline-flex items-center">
+          <a href="/instance/<%= req.params.id %>/files" class="inline-flex items-center text-neutral-400 hover:text-neutral-300 transition">
+            <svg class="w-3 h-3 mr-2.5" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
+              <path d="m19.707 9.293-2-2-7-7a1 1 0 0 0-1.414 0l-7 7-2 2a1 1 0 0 0 1.414 1.414L2 10.414V18a2 2 0 0 0 2 2h3a1 1 0 0 0 1-1v-4a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v4a1 1 0 0 0 1 1h3a2 2 0 0 0 2-2v-7.586l.293.293a1 1 0 0 0 1.414-1.414Z"/>
+            </svg>
+            Files
+          </a>
+        </li>
+        <% pathParts.forEach((part, index) => { %>
+          <li>
+            <div class="flex items-center">
+              <svg class="w-3 h-3 mx-1 text-neutral-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+              </svg>
+              <a href="/instance/<%= req.params.id %>/files?path=<%= pathParts.slice(0, index+1).join('/') %>" class="ml-1 text-neutral-400 hover:text-neutral-300 transition"><%= part %></a>
+            </div>
+          </li>
+        <% }); %>
+        <li aria-current="page">
+          <div class="flex items-center">
+            <svg class="w-3 h-3 mx-1 text-neutral-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
+              <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 9 4-4-4-4"/>
+            </svg>
+            <span class="ml-1 text-neutral-300 font-medium"><%= req.params.file %></span>
+          </div>
+        </li>
+      </ol>
+    </nav>
+  </div>
+
+  <!-- Editor Section -->
+  <div class="mt-6 px-8">
+    <div class="flex justify-between items-center mb-2">
+      <div class="text-sm text-neutral-400">
+        Editing: <span class="font-mono text-neutral-300"><%= req.params.file %></span>
+      </div>
+      <div class="text-sm text-neutral-400" id="statusIndicator">
+        <span id="saveStatus">All changes saved</span>
+      </div>
+    </div>
+    
+    <div class="rounded-lg overflow-hidden border border-white/5 bg-black/20 shadow-lg">
+      <div class="pt-8 overflow-hidden" style="height: 500px;" id="editor"></div>
+    </div>
+  </div>
+
+  <!-- Action Buttons -->
+  <div class="flex mt-8 space-x-4 px-8">
+    <a href="/instance/<%= req.params.id %>/files<%= query ? query : '' %>" type="button" class="rounded-xl bg-transparent border border-white/5 hover:bg-neutral-600/10 px-4 py-2 text-center text-sm font-normal text-neutral-300 shadow-lg transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+      <span class="flex items-center justify-center">
+        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+        </svg>
+        Back to Files
+      </span>
+    </a>
+    <button id="saveButton" onclick="saveFile()" type="button" class="rounded-xl <%= theme['button-color'] %> px-4 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
+      <span class="flex items-center justify-center">
+        <svg id="saveIcon" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span id="saveText">Save File</span>
+      </span>
+    </button>
+    <button id="extractButton" onclick="extractFile()" type="button" class="rounded-xl bg-indigo-600 hover:bg-indigo-700 px-4 py-2 text-center text-sm font-medium shadow-lg transition focus:outline focus:outline-2 focus:outline-offset-2">
+      <span class="flex items-center justify-center">
+        <svg id="extractIcon" class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+        </svg>
+        <span id="extractText">Download</span>
+      </span>
+    </button>
+  </div>
+</main>
+
+<%- include('../components/footer') %>
+
+<script>
+// Determine language based on file extension
+<%
+  const fileExtension = formattedFile.split('.').pop();
+  const languageMap = {
+    'js': 'javascript',
+    'json': 'json',
+    'html': 'html',
+    'css': 'css',
+    'ts': 'typescript',
+    'md': 'markdown',
+    'txt': 'plaintext',
+    'py': 'python',
+    'sh': 'shell',
+    'go': 'go',
+    'php': 'php',
+    'sql': 'sql',
+    'c': 'c',
+    'cpp': 'cpp',
+    'java': 'java',
+    'rb': 'ruby',
+    'pl': 'perl',
+    'yml': 'yaml',
+    'yaml': 'yaml',
+    'xml': 'xml'
+  };
+  const language = languageMap[fileExtension] || 'plaintext';
+%>
+
+// Initialize Monaco Editor
+require.config({ 
+  paths: { 
+    'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.34.0/min/vs' 
+  },
+  'vs/nls': {
+    availableLanguages: { '*': 'en' } // Fix for language localization issues
+  }
+});
+
+require(['vs/editor/editor.main'], function() {
+  var editor = monaco.editor.create(document.getElementById('editor'), {
+    value: <%- JSON.stringify(file) %>,
+    language: '<%= language %>',
+    theme: 'vs-dark',
+    minimap: { enabled: true },
+    automaticLayout: true,
+    fontSize: 14,
+    lineNumbers: 'on',
+    scrollBeyondLastLine: false,
+    renderWhitespace: 'selection',
+    scrollbar: {
+      vertical: 'auto',
+      horizontal: 'auto',
+      useShadows: true
+    }
+  });
+
+  window.editor = editor;
+  let hasUnsavedChanges = false;
+  
+  // Track changes
+  editor.onDidChangeModelContent(function() {
+    if (!hasUnsavedChanges) {
+      hasUnsavedChanges = true;
+      document.getElementById('saveStatus').textContent = 'Unsaved changes';
+      document.getElementById('saveStatus').classList.add('text-yellow-400');
+      document.getElementById('saveStatus').classList.remove('text-neutral-400');
+    }
+  });
+
+  // Save on Ctrl+S / Cmd+S
+  editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyS, function() {
+    saveFile();
+  });
+});
+
+// Save file function
+function saveFile() {
+  var button = document.getElementById('saveButton');
+  var saveText = document.getElementById('saveText');
+  var saveIcon = document.getElementById('saveIcon');
+  var statusIndicator = document.getElementById('saveStatus');
+  
+  // Change button state
+  button.disabled = true;
+  saveText.textContent = 'Saving...';
+  saveIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+  
+  // Get editor content
+  var fileContent = window.editor.getValue();
+  var filename = <%- JSON.stringify(req.params.file) %>;
+  var instanceId = <%- JSON.stringify(req.params.id) %>;
+
+  // Send save request
+  fetch(`/instance/${instanceId}/files/edit/${filename}<%= query %>`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      content: fileContent
+    })
+  })
+  .then(response => {
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+  })
+  .then(data => {
+    if (data && data.message) {
+      // Success state
+      saveText.textContent = 'Saved!';
+      saveIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>';
+      statusIndicator.textContent = 'All changes saved';
+      statusIndicator.classList.remove('text-yellow-400');
+      statusIndicator.classList.add('text-neutral-400');
+      hasUnsavedChanges = false;
+      
+      // Reset button after delay
+      setTimeout(() => {
+        button.disabled = false;
+        saveText.textContent = 'Save File';
+      }, 1500);
+    } else {
+      throw new Error('Invalid response from server');
+    }
+  })
+  .catch(error => {
+    console.error('Error:', error);
+    
+    // Error state
+    saveText.textContent = 'Error!';
+    saveIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>';
+    statusIndicator.textContent = 'Error saving file';
+    statusIndicator.classList.remove('text-neutral-400');
+    statusIndicator.classList.add('text-red-400');
+    
+    // Reset button after delay
+    setTimeout(() => {
+      button.disabled = false;
+      saveText.textContent = 'Save File';
+      saveIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>';
+    }, 2000);
+  });
+}
+
+// Extract/download file function
+function extractFile() {
+  var button = document.getElementById('extractButton');
+  var extractText = document.getElementById('extractText');
+  var extractIcon = document.getElementById('extractIcon');
+  
+  // Change button state
+  button.disabled = true;
+  extractText.textContent = 'Preparing...';
+  extractIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>';
+  
+  var filename = <%- JSON.stringify(req.params.file) %>;
+  var instanceId = <%- JSON.stringify(req.params.id) %>;
+  var fileContent = window.editor.getValue();
+  
+  // Create a blob and download link
+  var blob = new Blob([fileContent], { type: 'text/plain' });
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  
+  // Clean up
+  setTimeout(() => {
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+    
+    // Reset button state
+    button.disabled = false;
+    extractText.textContent = 'Download';
+    extractIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>';
+  }, 100);
+}
+</script>

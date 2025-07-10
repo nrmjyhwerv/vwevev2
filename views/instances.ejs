@@ -1,0 +1,761 @@
+<%- include('components/template') %>
+<main class="container flex-grow px-4 py-8 mx-auto animate-fade-in md:px-6 lg:px-8">
+  <!-- Header Section -->
+  <div class="flex flex-col justify-between w-full pb-8 gap-6 sm:flex-row sm:items-center sm:gap-0">
+    <div class="space-y-1">
+      <h1 class="text-3xl font-bold text-white tracking-tight">Server Dashboard</h1>
+      <p class="text-gray-400 text-md">Monitor and manage your <%= name %> infrastructure</p>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <!-- Search Bar -->
+      <div class="relative">
+        <div class="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+          <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+        </div>
+        <input 
+          type="text" 
+          id="serverSearch" 
+          class="block w-full py-2.5 pl-10 pr-4 text-white bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 placeholder-gray-400 transition-all duration-200" 
+          placeholder="Search servers..." 
+          x-data
+          @input.debounce.300ms="filterServers($event.target.value)"
+        >
+      </div>
+
+      <% if (req.user.admin) { %>
+        <div class="relative inline-block" x-data="{ open: false }" @click.outside="open = false">
+          <button 
+            @click="open = !open"
+            class="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-white transition-all duration-200 bg-gradient-to-r from-indigo-600 to-indigo-500 rounded-lg shadow-lg hover:shadow-indigo-500/20 hover:scale-[0.98] focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 focus:ring-offset-gray-900 sm:px-5"
+            aria-haspopup="true"
+            :aria-expanded="open"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+              <path fill-rule="evenodd" d="M3 3a1 1 0 011-1h12a1 1 0 011 1v3a1 1 0 01-.293.707L12 11.414V15a1 1 0 01-.293.707l-2 2A1 1 0 018 17v-5.586L3.293 6.707A1 1 0 013 6V3z" clip-rule="evenodd" />
+            </svg>
+            <span>Filter</span>
+            <svg 
+              xmlns="http://www.w3.org/2000/svg" 
+              viewBox="0 0 24 24" 
+              fill="none" 
+              stroke="currentColor" 
+              stroke-width="2"
+              class="w-4 h-4 transition-transform duration-200"
+              :class="open ? 'rotate-180' : ''"
+            >
+              <path stroke-linecap="round" stroke-linejoin="round" d="M19.5 8.25l-7.5 7.5-7.5-7.5" />
+            </svg>
+          </button>
+          <div 
+            x-show="open"
+            x-cloak
+            x-transition:enter="transition ease-out duration-100"
+            x-transition:enter-start="transform opacity-0 scale-95"
+            x-transition:enter-end="transform opacity-100 scale-100"
+            x-transition:leave="transition ease-in duration-75"
+            x-transition:leave-start="transform opacity-100 scale-100"
+            x-transition:leave-end="transform opacity-0 scale-95"
+            class="absolute right-0 z-20 w-48 mt-2 origin-top-right bg-gray-800 border border-gray-700 rounded-lg shadow-xl backdrop-blur-sm"
+            role="menu"
+          >
+            <div class="py-1" role="none">
+              <a 
+                href="/instances<%= req.query.see === 'other' ? '' : '?see=other' %>" 
+                class="flex items-center px-4 py-2.5 text-sm text-gray-200 transition-colors duration-150 hover:bg-gray-700/50"
+                role="menuitem"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                <%= req.query.see === 'other' ? 'Your Instances' : 'All Instances' %>
+              </a>
+            </div>
+          </div>
+        </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="grid grid-cols-1 gap-5 mb-8 sm:grid-cols-2 lg:grid-cols-4">
+    <!-- Total Instances -->
+    <div class="p-5 bg-gray-800/50 rounded-xl border border-gray-700 backdrop-blur-sm hover:border-indigo-500 transition-colors">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-400">Total Instances</p>
+          <p class="mt-1 text-2xl font-semibold text-white"><%= instances.length %></p>
+        </div>
+        <div class="p-3 rounded-lg bg-indigo-500/10">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Active Instances -->
+    <div class="p-5 bg-gray-800/50 rounded-xl border border-gray-700 backdrop-blur-sm hover:border-green-500 transition-colors">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-400">Active</p>
+          <p class="mt-1 text-2xl font-semibold text-white" id="activeInstancesCount">0</p>
+        </div>
+        <div class="p-3 rounded-lg bg-green-500/10">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Health -->
+    <div class="p-5 bg-gray-800/50 rounded-xl border border-gray-700 backdrop-blur-sm hover:border-emerald-500 transition-colors">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-400">System Health</p>
+          <p class="mt-1 text-2xl font-semibold text-emerald-500" id="healthStatus">Good</p>
+        </div>
+        <div class="p-3 rounded-lg bg-emerald-500/10">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Resource Usage -->
+    <div class="p-5 bg-gray-800/50 rounded-xl border border-gray-700 backdrop-blur-sm hover:border-blue-500 transition-colors">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-400">Avg. Resource Usage</p>
+          <p class="mt-1 text-2xl font-semibold text-blue-400" id="avgResourceUsage">0%</p>
+        </div>
+        <div class="p-3 rounded-lg bg-blue-500/10">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Instances Table -->
+  <div class="overflow-hidden shadow-xl ring-1 ring-gray-700 rounded-xl mb-12 animate-fade-in-up">
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-700">
+        <thead class="bg-gray-800">
+          <tr>
+            <th scope="col" class="py-3.5 pl-6 pr-3 text-left text-sm font-semibold text-white uppercase tracking-wider">Server</th>
+            <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-white uppercase tracking-wider">Status</th>
+            <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-white uppercase tracking-wider">Resources</th>
+            <th scope="col" class="px-4 py-3.5 text-left text-sm font-semibold text-white uppercase tracking-wider">Network</th>
+            <th scope="col" class="relative py-3.5 pl-3 pr-6">
+              <span class="sr-only">Actions</span>
+            </th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-700 bg-gray-900/50 backdrop-blur-sm" id="serversTableBody">
+          <% instances.forEach(instance => { %>
+            <tr 
+              data-instance-id="<%= instance.Id %>" 
+              data-instance-name="<%= instance.Name.toLowerCase() %>"
+              class="transition-all hover:bg-gray-800/50 cursor-pointer group server-row"
+            >
+              <td class="py-4 pl-6 pr-3 whitespace-nowrap">
+                <div class="flex items-center">
+                  <div class="flex-shrink-0 w-2.5 h-2.5 rounded-full bg-gray-500 animate-pulse group-hover:bg-indigo-500" id="statusIndicator_<%= instance.Id %>"></div>
+                  <div class="ml-4">
+                    <div class="text-sm font-medium text-white group-hover:text-indigo-400"><%= instance.Name %></div>
+                    <div class="text-xs text-gray-400"><%= instance.Id.substring(0, 8) %>...</div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <span id="status_<%= instance.Id %>" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-700/50 text-gray-200">
+                  <span class="animate-pulse">Checking...</span>
+                </span>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex flex-col gap-3">
+                  <!-- CPU Usage -->
+                  <div>
+                    <div class="flex items-center justify-between mb-1 text-xs text-gray-400">
+                      <span>CPU <span id="cpuUsagetext_<%= instance.Id %>">0%</span></span>
+                      <span id="cpuCoreCount_<%= instance.Id %>"></span>
+                    </div>
+                    <div class="relative w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                      <div 
+                        id="cpuUsageBar_<%= instance.Id %>" 
+                        class="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-400 to-blue-600 transition-all duration-500 ease-out" 
+                        style="width: 0%"
+                      ></div>
+                    </div>
+                  </div>
+
+                  <!-- RAM Usage -->
+                  <div>
+                    <div class="flex items-center justify-between mb-1 text-xs text-gray-400">
+                      <span>RAM <span id="ramUsagetext_<%= instance.Id %>">0%</span></span>
+                      <span id="ramUsageValue_<%= instance.Id %>">0 MB / 0 MB</span>
+                    </div>
+                    <div class="relative w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+                      <div 
+                        id="ramUsageBar_<%= instance.Id %>" 
+                        class="absolute top-0 left-0 h-full bg-gradient-to-r from-green-400 to-green-600 transition-all duration-500 ease-out" 
+                        style="width: 0%"
+                      ></div>
+                    </div>
+                  </div>
+                </div>
+              </td>
+              <td class="px-4 py-4 whitespace-nowrap">
+                <div class="flex flex-col">
+                  <div class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-gray-800 text-gray-200 mb-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+                    </svg>
+                    <%= instance.Node.address %>:<%= instance.Primary %>
+                  </div>
+                  <div class="text-xs text-gray-400" id="networkStats_<%= instance.Id %>">
+                    <span class="inline-flex items-center">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+                      </svg>
+                      <span id="networkIn_<%= instance.Id %>">0 B/s</span> ↓ / <span id="networkOut_<%= instance.Id %>">0 B/s</span> ↑
+                    </span>
+                  </div>
+                </div>
+              </td>
+              <td class="relative py-4 pl-3 pr-6 text-sm font-medium text-right whitespace-nowrap">
+                <div class="flex items-center justify-end space-x-2">
+                  <a href="../instance/<%= instance.Id %>" class="p-1 text-indigo-500 hover:text-indigo-400 transition-colors" title="View Details">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd" />
+                    </svg>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+
+    <% if (instances.length === 0) { %>
+      <div class="py-16 text-center bg-gradient-to-b from-gray-900/50 to-gray-900">
+        <div class="max-w-md mx-auto">
+          <div class="inline-flex items-center justify-center w-16 h-16 mx-auto rounded-full bg-gray-800/50 border border-gray-700">
+            <svg class="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+          </div>
+          <h3 class="mt-4 text-lg font-medium text-white">No instances found</h3>
+          <p class="mt-2 text-sm text-gray-400">You don't have any servers running yet.</p>
+          <div class="mt-6">
+            </a>
+          </div>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</main>
+      
+<%- include('components/footer') %>
+
+<script>
+  // Enhanced Instance Monitoring System with Error Handling
+  class InstanceMonitor {
+    constructor() {
+      this.wsConnections = {};
+      this.cpuPrevUsage = {};
+      this.networkPrevStats = {};
+      this.instanceStats = {};
+      this.activeInstances = 0;
+      this.healthStatus = 'Good';
+      this.reconnectDelays = {};
+      this.connectionTimeouts = {};
+      this.statsUpdateInterval = null;
+      this.totalCpuUsage = 0;
+      this.totalRamUsage = 0;
+      this.monitoredInstances = 0;
+    }
+
+    // Initialize all instance monitors
+    initAllInstances() {
+      <% instances.forEach(instance => { %>
+        this.initInstance('<%= instance.Id %>');
+      <% }); %>
+
+      // Set up periodic health check
+      this.statsUpdateInterval = setInterval(() => this.updateHealthStatus(), 30000);
+    }
+
+    // Initialize a single instance monitor
+    initInstance(instanceId) {
+      if (this.wsConnections[instanceId]) {
+        try {
+          this.wsConnections[instanceId].close();
+        } catch (e) {
+          console.error('Error closing existing connection:', e);
+        }
+      }
+
+      const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
+      const wsUrl = `${protocol}://${window.location.host}/stats/${instanceId}`;
+
+      try {
+        const ws = new WebSocket(wsUrl);
+        this.wsConnections[instanceId] = ws;
+        this.reconnectDelays[instanceId] = 1000;
+
+        ws.onopen = () => {
+          console.log(`WebSocket connected for instance ${instanceId}`);
+          this.reconnectDelays[instanceId] = 1000;
+          clearTimeout(this.connectionTimeouts[instanceId]);
+        };
+
+        ws.onmessage = (event) => {
+          try {
+            const stats = JSON.parse(event.data);
+            this.processStats(instanceId, stats);
+          } catch (e) {
+            console.error('Error parsing stats data:', e);
+            this.updateInstanceStatus(instanceId, "Error");
+          }
+        };
+
+        ws.onerror = (error) => {
+          console.error(`WebSocket error for instance ${instanceId}:`, error);
+          this.updateInstanceStatus(instanceId, "Error");
+        };
+
+        ws.onclose = () => {
+          console.log(`WebSocket closed for instance ${instanceId}, reconnecting...`);
+          this.updateInstanceStatus(instanceId, "Offline");
+          this.scheduleReconnect(instanceId);
+        };
+      } catch (e) {
+        console.error('Error creating WebSocket:', e);
+        this.updateInstanceStatus(instanceId, "Error");
+        this.scheduleReconnect(instanceId);
+      }
+    }
+
+    // Process incoming stats data
+    processStats(instanceId, stats) {
+      if (!stats) {
+        console.error('Received empty stats for instance', instanceId);
+        return;
+      }
+
+      try {
+        // Update CPU usage
+        const cpuPercentage = this.calculateCPUUsage(instanceId, stats);
+        this.updateCpuUsage(instanceId, cpuPercentage, stats.cpu_stats?.online_cpus || 1);
+
+        // Update RAM usage
+        const ramLimit = stats.memory_stats?.limit || 1;
+        const ramUsage = stats.memory_stats?.usage || 0;
+        const ramPercentage = ramLimit > 0 ? (ramUsage / ramLimit) * 100 : 0;
+        this.updateRamUsage(instanceId, ramPercentage, ramUsage, ramLimit);
+
+        // Update network stats
+        if (stats.networks) {
+          const networkStats = this.calculateNetworkUsage(instanceId, stats.networks);
+          this.updateNetworkStats(instanceId, networkStats);
+        }
+
+        // Determine instance status
+        this.determineInstanceStatus(instanceId, stats);
+
+        // Update average resource usage
+        this.updateAverageResourceUsage();
+      } catch (e) {
+        console.error('Error processing stats:', e);
+        this.updateInstanceStatus(instanceId, "Error");
+      }
+    }
+
+    // Calculate CPU usage with core awareness
+    calculateCPUUsage(instanceId, newStats) {
+      if (!newStats?.cpu_stats?.cpu_usage) return 0;
+
+      if (!this.cpuPrevUsage[instanceId]) {
+        this.cpuPrevUsage[instanceId] = {
+          cpuTotal: newStats.cpu_stats.cpu_usage.total_usage,
+          systemTotal: newStats.cpu_stats.system_cpu_usage || 0,
+          cores: newStats.cpu_stats.online_cpus || 1,
+          timestamp: Date.now()
+        };
+        return 0;
+      }
+
+      const prev = this.cpuPrevUsage[instanceId];
+      const cpuDelta = newStats.cpu_stats.cpu_usage.total_usage - prev.cpuTotal;
+      const systemDelta = (newStats.cpu_stats.system_cpu_usage || 0) - prev.systemTotal;
+      const timeDelta = Date.now() - prev.timestamp;
+
+      // Update previous values
+      this.cpuPrevUsage[instanceId] = {
+        cpuTotal: newStats.cpu_stats.cpu_usage.total_usage,
+        systemTotal: newStats.cpu_stats.system_cpu_usage || 0,
+        cores: newStats.cpu_stats.online_cpus || prev.cores,
+        timestamp: Date.now()
+      };
+
+      if (systemDelta > 0 && timeDelta > 0) {
+        return (cpuDelta / systemDelta) * 100 * prev.cores;
+      }
+
+      return 0;
+    }
+
+    // Calculate network usage
+    calculateNetworkUsage(instanceId, networks) {
+      const now = Date.now();
+      let totalRx = 0;
+      let totalTx = 0;
+
+      // Sum up all network interfaces
+      Object.values(networks).forEach(net => {
+        totalRx += net.rx_bytes || 0;
+        totalTx += net.tx_bytes || 0;
+      });
+
+      if (!this.networkPrevStats[instanceId]) {
+        this.networkPrevStats[instanceId] = {
+          rxBytes: totalRx,
+          txBytes: totalTx,
+          timestamp: now
+        };
+        return { rxRate: 0, txRate: 0 };
+      }
+
+      const prev = this.networkPrevStats[instanceId];
+      const timeDelta = (now - prev.timestamp) / 1000; // in seconds
+
+      const rxRate = timeDelta > 0 ? (totalRx - prev.rxBytes) / timeDelta : 0;
+      const txRate = timeDelta > 0 ? (totalTx - prev.txBytes) / timeDelta : 0;
+
+      // Update previous values
+      this.networkPrevStats[instanceId] = {
+        rxBytes: totalRx,
+        txBytes: totalTx,
+        timestamp: now
+      };
+
+      return { rxRate, txRate };
+    }
+
+    // Determine instance status based on stats
+    determineInstanceStatus(instanceId, stats) {
+      try {
+        const ramUsage = stats.memory_stats?.usage || 0;
+        const cpuUsage = stats.cpu_stats?.cpu_usage?.total_usage || 0;
+
+        if (ramUsage > 0 || cpuUsage > 0) {
+          this.updateInstanceStatus(instanceId, "Online");
+        } else if (stats.State?.Starting) {
+          this.updateInstanceStatus(instanceId, "Starting");
+        } else if (stats.State?.Error) {
+          this.updateInstanceStatus(instanceId, "Error");
+        } else {
+          this.updateInstanceStatus(instanceId, "Offline");
+        }
+      } catch (e) {
+        console.error('Error determining status:', e);
+        this.updateInstanceStatus(instanceId, "Error");
+      }
+    }
+
+    // Update instance status display
+    updateInstanceStatus(instanceId, status) {
+      try {
+        const statusElement = document.getElementById(`status_${instanceId}`);
+        const indicatorElement = document.getElementById(`statusIndicator_${instanceId}`);
+
+        if (!statusElement || !indicatorElement) {
+          console.error('Status elements not found for instance', instanceId);
+          return;
+        }
+
+        // Update active instances count
+        const previousStatus = this.instanceStats[instanceId]?.status;
+        if (previousStatus === 'Online' && status !== 'Online') {
+          this.activeInstances--;
+        } else if (previousStatus !== 'Online' && status === 'Online') {
+          this.activeInstances++;
+        }
+
+        document.getElementById('activeInstancesCount').textContent = this.activeInstances;
+
+        // Update UI
+        let statusClass, indicatorClass, statusText;
+
+        switch(status) {
+          case 'Online':
+            statusClass = 'bg-green-900/20 text-green-400';
+            indicatorClass = 'bg-green-500 group-hover:bg-green-400';
+            statusText = 'Online';
+            break;
+          case 'Starting':
+            statusClass = 'bg-yellow-900/20 text-yellow-400';
+            indicatorClass = 'bg-yellow-500 animate-pulse group-hover:bg-yellow-400';
+            statusText = 'Starting';
+            break;
+          case 'Error':
+            statusClass = 'bg-red-900/20 text-red-400';
+            indicatorClass = 'bg-red-500 group-hover:bg-red-400';
+            statusText = 'Error';
+            break;
+          default: // Offline
+            statusClass = 'bg-gray-700/50 text-gray-400';
+            indicatorClass = 'bg-gray-500 group-hover:bg-gray-400';
+            statusText = 'Offline';
+        }
+
+        statusElement.innerHTML = `
+          <span class="flex items-center">
+            <span class="w-2 h-2 mr-2 rounded-full ${indicatorClass.replace('group-hover:bg-', 'bg-')}"></span> 
+            <span>${statusText}</span>
+          </span>`;
+        statusElement.className = `inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${statusClass}`;
+        indicatorElement.className = `flex-shrink-0 w-2.5 h-2.5 rounded-full ${indicatorClass}`;
+
+        // Update instance stats
+        if (!this.instanceStats[instanceId]) {
+          this.instanceStats[instanceId] = {};
+        }
+        this.instanceStats[instanceId].status = status;
+      } catch (e) {
+        console.error('Error updating status display:', e);
+      }
+    }
+
+    // Update CPU usage display
+    updateCpuUsage(instanceId, percentage, cores) {
+      try {
+        const cpuBar = document.getElementById(`cpuUsageBar_${instanceId}`);
+        const cpuText = document.getElementById(`cpuUsagetext_${instanceId}`);
+        const cpuCores = document.getElementById(`cpuCoreCount_${instanceId}`);
+
+        if (!cpuBar || !cpuText || !cpuCores) return;
+
+        const roundedPercentage = Math.min(100, Math.round(percentage));
+
+        cpuBar.style.width = `${roundedPercentage}%`;
+        cpuText.textContent = `${roundedPercentage}%`;
+        cpuCores.textContent = `${cores} core${cores > 1 ? 's' : ''}`;
+        cpuBar.style.opacity = 0.7 + (0.3 * (roundedPercentage / 100));
+
+        // Update instance stats
+        if (!this.instanceStats[instanceId]) {
+          this.instanceStats[instanceId] = {};
+        }
+        this.instanceStats[instanceId].cpuPercentage = roundedPercentage;
+        this.instanceStats[instanceId].cpuCores = cores;
+      } catch (e) {
+        console.error('Error updating CPU display:', e);
+      }
+    }
+
+    // Update RAM usage display
+    updateRamUsage(instanceId, percentage, usage, limit) {
+      try {
+        const ramBar = document.getElementById(`ramUsageBar_${instanceId}`);
+        const ramText = document.getElementById(`ramUsagetext_${instanceId}`);
+        const ramValue = document.getElementById(`ramUsageValue_${instanceId}`);
+
+        if (!ramBar || !ramText || !ramValue) return;
+
+        const roundedPercentage = Math.min(100, Math.round(percentage));
+
+        ramBar.style.width = `${roundedPercentage}%`;
+        ramText.textContent = `${roundedPercentage}%`;
+        ramValue.textContent = `${this.formatBytes(usage)} / ${this.formatBytes(limit)}`;
+        ramBar.style.opacity = 0.7 + (0.3 * (roundedPercentage / 100));
+
+        // Update instance stats
+        if (!this.instanceStats[instanceId]) {
+          this.instanceStats[instanceId] = {};
+        }
+        this.instanceStats[instanceId].ramPercentage = roundedPercentage;
+        this.instanceStats[instanceId].ramUsage = usage;
+        this.instanceStats[instanceId].ramLimit = limit;
+      } catch (e) {
+        console.error('Error updating RAM display:', e);
+      }
+    }
+
+    // Update network stats display
+    updateNetworkStats(instanceId, { rxRate, txRate }) {
+      try {
+        const networkIn = document.getElementById(`networkIn_${instanceId}`);
+        const networkOut = document.getElementById(`networkOut_${instanceId}`);
+
+        if (networkIn) networkIn.textContent = `${this.formatBytes(rxRate)}/s`;
+        if (networkOut) networkOut.textContent = `${this.formatBytes(txRate)}/s`;
+      } catch (e) {
+        console.error('Error updating network stats:', e);
+      }
+    }
+
+    // Update average resource usage
+    updateAverageResourceUsage() {
+      try {
+        let totalCpu = 0;
+        let totalRam = 0;
+        let count = 0;
+
+        Object.values(this.instanceStats).forEach(instance => {
+          if (instance.cpuPercentage !== undefined) {
+            totalCpu += instance.cpuPercentage;
+            totalRam += instance.ramPercentage || 0;
+            count++;
+          }
+        });
+
+        if (count > 0) {
+          const avgCpu = Math.round(totalCpu / count);
+          const avgRam = Math.round(totalRam / count);
+          const avgTotal = Math.round((avgCpu + avgRam) / 2);
+
+          document.getElementById('avgResourceUsage').textContent = `${avgTotal}%`;
+        }
+      } catch (e) {
+        console.error('Error updating average resource usage:', e);
+      }
+    }
+
+    // Update overall health status
+    updateHealthStatus() {
+      try {
+        const instances = Object.values(this.instanceStats);
+        if (instances.length === 0) {
+          this.healthStatus = 'Unknown';
+        } else {
+          const errorCount = instances.filter(i => i.status === 'Error').length;
+          const offlineCount = instances.filter(i => i.status === 'Offline').length;
+          const totalCount = instances.length;
+
+          if (errorCount > 0) {
+            this.healthStatus = 'Critical';
+          } else if (offlineCount > totalCount * 0.3) { // More than 30% offline
+            this.healthStatus = 'Degraded';
+          } else {
+            this.healthStatus = 'Good';
+          }
+        }
+
+        const healthElement = document.getElementById('healthStatus');
+        if (!healthElement) return;
+
+        healthElement.textContent = this.healthStatus;
+
+        // Update color based on status
+        switch(this.healthStatus) {
+          case 'Critical':
+            healthElement.className = 'mt-1 text-2xl font-semibold text-red-500';
+            break;
+          case 'Degraded':
+            healthElement.className = 'mt-1 text-2xl font-semibold text-yellow-500';
+            break;
+          case 'Good':
+            healthElement.className = 'mt-1 text-2xl font-semibold text-emerald-500';
+            break;
+          default:
+            healthElement.className = 'mt-1 text-2xl font-semibold text-gray-400';
+        }
+      } catch (e) {
+        console.error('Error updating health status:', e);
+      }
+    }
+
+    // Schedule reconnection with exponential backoff
+    scheduleReconnect(instanceId) {
+      clearTimeout(this.connectionTimeouts[instanceId]);
+
+      this.connectionTimeouts[instanceId] = setTimeout(() => {
+        this.initInstance(instanceId);
+        this.reconnectDelays[instanceId] = Math.min(30000, this.reconnectDelays[instanceId] * 2);
+      }, this.reconnectDelays[instanceId]);
+    }
+
+    // Format bytes to human readable format
+    formatBytes(bytes, decimals = 2) {
+      if (bytes === 0) return '0 Bytes';
+      const k = 1024;
+      const dm = decimals < 0 ? 0 : decimals;
+      const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+      const i = Math.floor(Math.log(bytes) / Math.log(k));
+      return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+    }
+
+    // Clean up all connections
+    cleanup() {
+      Object.keys(this.wsConnections).forEach(instanceId => {
+        try { 
+          this.wsConnections[instanceId].close(); 
+          clearTimeout(this.connectionTimeouts[instanceId]);
+        } catch (e) {
+          console.error('Error cleaning up connection:', e);
+        }
+      });
+
+      if (this.statsUpdateInterval) {
+        clearInterval(this.statsUpdateInterval);
+      }
+    }
+  }
+
+  // Server search functionality
+  function filterServers(searchTerm) {
+    const rows = document.querySelectorAll('.server-row');
+    const term = searchTerm.toLowerCase().trim();
+
+    rows.forEach(row => {
+      const serverName = row.getAttribute('data-instance-name');
+      if (serverName.includes(term)) {
+        row.classList.remove('hidden');
+      } else {
+        row.classList.add('hidden');
+      }
+    });
+  }
+
+  // Initialize when DOM is ready
+  document.addEventListener('DOMContentLoaded', () => {
+    const monitor = new InstanceMonitor();
+    monitor.initAllInstances();
+
+    // Add click handlers for instance rows
+    document.querySelectorAll('tr[data-instance-id]').forEach(row => {
+      row.addEventListener('click', (e) => {
+        // Ignore if clicking on a link or button
+        if (e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a, button')) {
+          return;
+        }
+        const instanceId = row.getAttribute('data-instance-id');
+        window.location.href = `../instance/${instanceId}`;
+      });
+    });
+
+    // Clean up on page unload
+    window.addEventListener('beforeunload', () => {
+      monitor.cleanup();
+    });
+
+    // Mobile menu toggle (if needed)
+    const mobileMenuButton = document.getElementById('mobile-menu-button');
+    const mobileMenu = document.getElementById('mobile-menu');
+
+    if (mobileMenuButton && mobileMenu) {
+      mobileMenuButton.addEventListener('click', () => {
+        mobileMenu.classList.toggle('hidden');
+      });
+    }
+  });
+</script>

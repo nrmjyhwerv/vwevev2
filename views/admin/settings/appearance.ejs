@@ -1,0 +1,351 @@
+<%- include('../../components/admin_template') %>
+
+<main class="relative">
+  <!-- Enhanced Header -->
+  <div class="px-6 pt-6 pb-4 border-b border-neutral-800 bg-gradient-to-r from-neutral-900 to-neutral-800">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-2xl font-bold text-white flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          <%= req.translations.settings %>
+        </h1>
+        <p class="mt-1 text-sm text-neutral-400">Change common settings on the Cryptalis panel.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="px-3 py-1 bg-neutral-800 rounded-full text-xs font-medium text-neutral-300 flex items-center gap-1">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+          </svg>
+          Changes saved automatically
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Improved Settings Navigation -->
+  <%- include('../../components/settings') %>
+
+  <!-- Main Content -->
+  <div class="px-6 py-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Panel Branding Card - Enhanced -->
+      <div class="bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden transition-all duration-300 hover:border-neutral-700 hover:shadow-lg">
+        <div class="px-5 py-4 border-b border-neutral-800 bg-neutral-800/50">
+          <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z" />
+            </svg>
+            Panel Branding
+          </h2>
+        </div>
+        <div class="p-5 space-y-6">
+          <!-- Panel Name - Improved -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label for="panel-name" class="block text-sm font-medium text-neutral-300">Panel Name</label>
+              <span class="text-xs text-neutral-500">Max 32 characters</span>
+            </div>
+            <form action="/admin/settings/change/name" method="POST" class="flex gap-2">
+              <div class="relative flex-1">
+                <input 
+                  id="panel-name" 
+                  name="name" 
+                  type="text" 
+                  value="<%= name %>"
+                  maxlength="32"
+                  class="w-full bg-neutral-800 border border-neutral-700 rounded-lg px-4 py-2.5 text-sm text-white placeholder-neutral-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition peer"
+                  placeholder="My Awesome Panel"
+                  required>
+                <span class="absolute right-3 top-2.5 text-xs text-neutral-500 hidden peer-focus:block"></span>
+              </div>
+              <button 
+                type="submit"
+                class="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 whitespace-nowrap">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                </svg>
+                Save
+              </button>
+            </form>
+          </div>
+
+          <!-- Panel Logo - Enhanced -->
+          <div>
+            <label class="block text-sm font-medium text-neutral-300 mb-2">Panel Logo</label>
+            <form action="/admin/settings/change/logo" method="POST" enctype="multipart/form-data" class="space-y-4">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                  <div class="relative">
+                    <input 
+                      id="use-image" 
+                      name="useImage" 
+                      type="checkbox" 
+                      class="hidden peer"
+                      onchange="document.getElementById('image-upload-box').classList.toggle('hidden')">
+                    <label 
+                      for="use-image" 
+                      class="w-12 h-6 flex items-center bg-neutral-700 rounded-full p-1 cursor-pointer duration-300 ease-in-out peer-checked:bg-indigo-600">
+                      <div class="bg-white w-4 h-4 rounded-full shadow-md transform duration-300 ease-in-out peer-checked:translate-x-6"></div>
+                    </label>
+                  </div>
+                  <span class="text-sm text-neutral-300">Use Custom Image</span>
+                </div>
+                <% if (logo) { %>
+                  <a href="<%= logo %>" target="_blank" class="text-xs text-indigo-400 hover:text-indigo-300 flex items-center gap-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                      
+                      
+                  </a>
+                <% } %>
+              </div>
+
+              <div id="image-upload-box" class="hidden transition-all duration-300">
+                <div class="flex flex-col gap-3">
+                  <label class="block">
+                    <span class="sr-only">Choose logo</span>
+                    <div class="mt-1 flex items-center">
+                      <input 
+                        type="file" 
+                        name="logo" 
+                        id="logo-upload"
+                        accept="image/png, image/jpeg, image/svg+xml"
+                        class="hidden"
+                        onchange="previewLogo(event)">
+                      <label for="logo-upload" class="cursor-pointer bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 rounded-lg px-4 py-2 text-sm text-neutral-300 transition flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        Select Image
+                      </label>
+                      <span id="file-name" class="ml-3 text-sm text-neutral-400 truncate max-w-xs">No file selected</span>
+                    </div>
+                  </label>
+                  <div id="logo-preview" class="hidden mt-2">
+                    <p class="text-xs text-neutral-500 mb-1">Preview:</p>
+                    <img id="preview-image" class="max-h-20 rounded border border-neutral-700" src="#" alt="Logo preview">
+                  </div>
+                </div>
+              </div>
+
+              <input type="hidden" name="type" id="logoType" value="none">
+
+              <button 
+                type="submit"
+                id="logo-submit-btn"
+                class="w-full bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+                Update Logo
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Registration Settings Card - Enhanced -->
+      <div class="bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden transition-all duration-300 hover:border-neutral-700 hover:shadow-lg">
+        <div class="px-5 py-4 border-b border-neutral-800 bg-neutral-800/50">
+          <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+            Registration Settings
+          </h2>
+        </div>
+        <div class="p-5 space-y-6">
+          <!-- Registration Toggle - Improved -->
+          <div class="bg-neutral-800/50 p-4 rounded-lg border border-neutral-800">
+            <div class="flex items-center justify-between">
+              <div>
+                <label class="text-sm font-medium text-neutral-300">Registration Page</label>
+                <p class="text-xs text-neutral-500 mt-1">
+                  <%= settings.register ? 'New users can create accounts' : 'Account creation is disabled' %>
+                </p>
+              </div>
+              <form action="/admin/settings/toggle/register" method="POST">
+                <input type="hidden" name="register" value="<%= !settings.register %>">
+                <button 
+                  type="submit"
+                  class="relative inline-flex items-center cursor-pointer group">
+                  <input 
+                    type="checkbox" 
+                    class="sr-only peer" 
+                    <%= settings.register ? 'checked' : '' %>
+                    onchange="this.form.submit()">
+                  <div class="w-12 h-6 bg-neutral-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-indigo-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all group-hover:after:shadow-sm"></div>
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Force Verify Toggle - Improved -->
+          <div class="bg-neutral-800/50 p-4 rounded-lg border border-neutral-800">
+            <div class="flex items-center justify-between">
+              <div>
+                <label class="text-sm font-medium text-neutral-300">Force Email Verification</label>
+                <p class="text-xs text-neutral-500 mt-1">
+                  <%= settings.forceVerify ? 'Required for all accounts' : 'Optional for users' %>
+                </p>
+              </div>
+              <form action="/admin/settings/toggle/force-verify" method="POST">
+                <input type="hidden" name="forceVerify" value="<%= !settings.forceVerify %>">
+                <button 
+                  type="submit"
+                  class="relative inline-flex items-center cursor-pointer group">
+                  <input 
+                    type="checkbox" 
+                    class="sr-only peer" 
+                    <%= settings.forceVerify ? 'checked' : '' %>
+                    onchange="this.form.submit()">
+                  <div class="w-12 h-6 bg-neutral-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-indigo-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all group-hover:after:shadow-sm"></div>
+                </button>
+              </form>
+            </div>
+          </div>
+
+          <!-- Additional Options -->
+          <div class="bg-neutral-800/50 p-4 rounded-lg border border-neutral-800">
+            <label class="text-sm font-medium text-neutral-300 mb-2">Registration Restrictions</label>
+            <div class="space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-neutral-400">Require Invite Code</span>
+                <button class="text-xs bg-neutral-800 text-neutral-400 px-2 py-1 rounded cursor-not-allowed" disabled>Coming Soon</button>
+              </div>
+              <div class="flex items-center justify-between">
+                <span class="text-sm text-neutral-400">Enable CAPTCHA</span>
+                <button class="text-xs bg-neutral-800 text-neutral-400 px-2 py-1 rounded cursor-not-allowed" disabled>Coming Soon</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Additional Settings Card - Enhanced -->
+      <div class="bg-neutral-900 rounded-xl border border-neutral-800 overflow-hidden transition-all duration-300 hover:border-neutral-700 hover:shadow-lg">
+        <div class="px-5 py-4 border-b border-neutral-800 bg-neutral-800/50">
+          <h2 class="text-lg font-semibold text-white flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+            Advanced Settings
+          </h2>
+        </div>
+        <div class="p-5">
+          <div class="bg-neutral-800/50 p-4 rounded-lg border border-neutral-800 mb-4">
+            <h3 class="text-sm font-medium text-neutral-300 mb-2 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+              API Settings
+              </h3>
+                <p class="text-xs text-neutral-500 mb-3">Configure API access and rate limiting</p>
+                <a href="/admin/apikeys" class="w-full bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2">
+                  Configure API
+                </a>
+              </div>
+
+          <div class="bg-neutral-800/50 p-4 rounded-lg border border-neutral-800">
+            <h3 class="text-sm font-medium text-neutral-300 mb-2 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+              </svg>
+              Security Settings
+            </h3>
+            <p class="text-xs text-neutral-500 mb-3">Configure security policies and protections</p>
+            <button class="w-full bg-neutral-800 hover:bg-neutral-700 border border-neutral-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition flex items-center justify-center gap-2 opacity-50 cursor-not-allowed">
+              Configure Security
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<%- include('../../components/head') %>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize logo upload toggle
+    const useImageCheckbox = document.getElementById('use-image');
+    const imageUploadBox = document.getElementById('image-upload-box');
+
+    // Character counter for panel name
+    const panelNameInput = document.getElementById('panel-name');
+    if (panelNameInput) {
+      panelNameInput.addEventListener('input', function() {
+        const counter = this.nextElementSibling;
+        if (counter) {
+          counter.textContent = `${32 - this.value.length} left`;
+        }
+      });
+    }
+
+    // Logo preview functionality
+    window.previewLogo = function(event) {
+      const input = event.target;
+      const fileName = document.getElementById('file-name');
+      const preview = document.getElementById('logo-preview');
+      const previewImage = document.getElementById('preview-image');
+      const submitBtn = document.getElementById('logo-submit-btn');
+
+      if (input.files && input.files[0]) {
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+          previewImage.src = e.target.result;
+          preview.classList.remove('hidden');
+          submitBtn.disabled = false;
+        }
+
+        reader.readAsDataURL(input.files[0]);
+        fileName.textContent = input.files[0].name;
+      }
+    };
+
+    // Add hover effects to all cards
+    const cards = document.querySelectorAll('.bg-neutral-900');
+    cards.forEach(card => {
+      card.addEventListener('mouseenter', () => {
+        card.querySelector('button:not([disabled])')?.classList.add('hover:bg-indigo-600');
+      });
+      card.addEventListener('mouseleave', () => {
+        card.querySelector('button:not([disabled])')?.classList.remove('hover:bg-indigo-600');
+      });
+    });
+
+    // Show save confirmation when forms are submitted
+    document.querySelectorAll('form').forEach(form => {
+      form.addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        if (submitBtn && !submitBtn.disabled) {
+          const originalText = submitBtn.innerHTML;
+          submitBtn.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+            Saving...
+          `;
+          submitBtn.disabled = true;
+
+          setTimeout(() => {
+            submitBtn.innerHTML = `
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+              </svg>
+              Saved
+            `;
+            setTimeout(() => {
+              submitBtn.innerHTML = originalText;
+              submitBtn.disabled = false;
+            }, 1500);
+          }, 800);
+        }
+      });
+    });
+  });
+</script>

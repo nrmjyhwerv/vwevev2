@@ -1,0 +1,551 @@
+<%- include('../components/admin_template') %>
+<main id="content">
+   <div class="bg-transparent">
+      <div class="sm:flex sm:items-center px-6 lg:px-8 pt-4">
+         <div class="sm:flex-auto">
+           <h1 class="text-xl font-semibold leading-6 text-white"><%= req.translations.analytics || 'Analytics' %></h1>
+           <p class="mt-1 tracking-tight text-sm text-neutral-400"><%= req.translations.analyticsText || 'View detailed analytics of your Cryptalis Panel' %></p>
+         </div>
+         <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+           <div class="relative">
+             <select id="timeRange" class="bg-neutral-800/50 border border-neutral-700 text-white text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2 pr-8 appearance-none">
+               <option value="24h"><%= req.translations.last24Hours || 'Last 24 hours' %></option>
+               <option value="7d" selected><%= req.translations.last7Days || 'Last 7 days' %></option>
+               <option value="30d"><%= req.translations.last30Days || 'Last 30 days' %></option>
+               <option value="90d"><%= req.translations.last90Days || 'Last 90 days' %></option>
+             </select>
+             <div class="absolute inset-y-0 right-0 flex items-center pr-2 pointer-events-none">
+               <svg class="w-4 h-4 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+               </svg>
+             </div>
+           </div>
+         </div>
+       </div>
+
+       <!-- Loading State -->
+       <div id="loadingIndicator" class="px-8 mt-8">
+         <div class="animate-pulse space-y-4">
+           <div class="grid grid-cols-1 gap-5 sm:grid-cols-4">
+             <div class="h-28 rounded-xl bg-neutral-700/10"></div>
+             <div class="h-28 rounded-xl bg-neutral-700/10"></div>
+             <div class="h-28 rounded-xl bg-neutral-700/10"></div>
+             <div class="h-28 rounded-xl bg-neutral-700/10"></div>
+           </div>
+           <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
+             <div class="h-80 rounded-xl bg-neutral-700/10"></div>
+             <div class="h-80 rounded-xl bg-neutral-700/10"></div>
+           </div>
+         </div>
+       </div>
+
+       <!-- Data State (initially hidden) -->
+       <div id="dataContainer" class="hidden px-6 lg:px-8 mt-5">
+         <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="overflow-hidden rounded-lg border border-neutral-700/50 bg-neutral-800/30 px-4 py-5 shadow sm:p-6 hover:bg-neutral-700/20 transition-colors duration-200">
+               <dt class="truncate text-sm font-medium text-neutral-400 flex items-center">
+                 <svg class="w-4 h-4 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                 </svg>
+                 <%= req.translations.totalRequests || 'Total Requests' %>
+               </dt>
+               <dd class="mt-1 text-3xl font-semibold tracking-tight text-white flex items-baseline">
+                 <span id="totalRequests">0</span>
+                 <span class="ml-2 text-sm font-medium text-green-400 hidden" id="totalRequestsChange">
+                   <span id="totalRequestsChangeValue">+0%</span>
+                   <svg class="w-4 h-4 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                   </svg>
+                 </span>
+               </dd>
+            </div>
+            <div class="overflow-hidden rounded-lg border border-neutral-700/50 bg-neutral-800/30 px-4 py-5 shadow sm:p-6 hover:bg-neutral-700/20 transition-colors duration-200">
+               <dt class="truncate text-sm font-medium text-neutral-400 flex items-center">
+                 <svg class="w-4 h-4 mr-2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                 </svg>
+                 <%= req.translations.uniqueVisitors || 'Unique Visitors' %>
+               </dt>
+               <dd class="mt-1 text-3xl font-semibold tracking-tight text-white flex items-baseline">
+                 <span id="uniqueVisitors">0</span>
+                 <span class="ml-2 text-sm font-medium text-green-400 hidden" id="uniqueVisitorsChange">
+                   <span id="uniqueVisitorsChangeValue">+0%</span>
+                   <svg class="w-4 h-4 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                   </svg>
+                 </span>
+               </dd>
+            </div>
+            <div class="overflow-hidden rounded-lg border border-neutral-700/50 bg-neutral-800/30 px-4 py-5 shadow sm:p-6 hover:bg-neutral-700/20 transition-colors duration-200">
+               <dt class="truncate text-sm font-medium text-neutral-400 flex items-center">
+                 <svg class="w-4 h-4 mr-2 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                 </svg>
+                 <%= req.translations.avgRequestsPerHour || 'Avg Requests/Hour' %>
+               </dt>
+               <dd class="mt-1 text-3xl font-semibold tracking-tight text-white flex items-baseline">
+                 <span id="avgRequestsPerHour">0</span>
+                 <span class="ml-2 text-sm font-medium text-green-400 hidden" id="avgRequestsPerHourChange">
+                   <span id="avgRequestsPerHourChangeValue">+0%</span>
+                   <svg class="w-4 h-4 inline ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>
+                   </svg>
+                 </span>
+               </dd>
+            </div>
+            <div class="overflow-hidden rounded-lg border border-neutral-700/50 bg-neutral-800/30 px-4 py-5 shadow sm:p-6 hover:bg-neutral-700/20 transition-colors duration-200">
+               <dt class="truncate text-sm font-medium text-neutral-400 flex items-center">
+                 <svg class="w-4 h-4 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                 </svg>
+                 <%= req.translations.topPage || 'Top Page' %>
+               </dt>
+               <dd class="mt-1 text-xl font-medium tracking-tight text-white truncate" id="topPage" title="Loading...">
+                  Loading...
+               </dd>
+               <dd class="mt-1 text-sm text-neutral-400 truncate" id="topPageViews" title="Loading...">
+                  <span id="topPageViewsCount">0</span> views
+               </dd>
+            </div>
+         </div>
+
+         <div class="mt-5 grid grid-cols-1 gap-5 lg:grid-cols-2">
+            <div class="overflow-hidden rounded-lg border border-neutral-700/50 bg-neutral-800/30 px-4 py-5 shadow sm:p-6">
+               <div class="flex justify-between items-center mb-4">
+                 <h3 class="text-sm font-medium text-neutral-400 flex items-center">
+                   <svg class="w-4 h-4 mr-2 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                   </svg>
+                   <%= req.translations.trafficOverTime || 'Traffic Over Time' %>
+                 </h3>
+                 <div class="flex space-x-2">
+                   <button class="text-xs px-2 py-1 rounded bg-neutral-700/50 text-neutral-300 hover:bg-neutral-600/50 transition-colors duration-200" data-chart-type="line">Line</button>
+                   <button class="text-xs px-2 py-1 rounded bg-neutral-700/50 text-neutral-300 hover:bg-neutral-600/50 transition-colors duration-200" data-chart-type="bar">Bar</button>
+                 </div>
+               </div>
+               <div class="h-80">
+                 <canvas id="trafficChart"></canvas>
+               </div>
+            </div>
+            <div class="overflow-hidden rounded-lg border border-neutral-700/50 bg-neutral-800/30 px-4 py-5 shadow sm:p-6">
+               <div class="flex justify-between items-center mb-4">
+                 <h3 class="text-sm font-medium text-neutral-400 flex items-center">
+                   <svg class="w-4 h-4 mr-2 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                   </svg>
+                   <%= req.translations.topPages || 'Top Pages' %>
+                 </h3>
+                 <div class="text-xs text-neutral-400" id="topPagesCount">Top 5</div>
+               </div>
+               <div class="h-80">
+                 <canvas id="topPagesChart"></canvas>
+               </div>
+            </div>
+         </div>
+
+         <!-- Additional Data Section -->
+         <div class="mt-5 grid grid-cols-1 gap-5">
+            <div class="overflow-hidden rounded-lg border border-neutral-700/50 bg-neutral-800/30 px-4 py-5 shadow sm:p-6">
+               <h3 class="text-sm font-medium text-neutral-400 mb-4 flex items-center">
+                 <svg class="w-4 h-4 mr-2 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                 </svg>
+                 <%= req.translations.additionalMetrics || 'Additional Metrics' %>
+               </h3>
+               <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                 <div class="p-4 rounded-lg bg-neutral-700/10">
+                   <dt class="text-xs font-medium text-neutral-400"><%= req.translations.bounceRate || 'Bounce Rate' %></dt>
+                   <dd class="mt-1 text-2xl font-semibold text-white" id="bounceRate">0%</dd>
+                 </div>
+                 <div class="p-4 rounded-lg bg-neutral-700/10">
+                   <dt class="text-xs font-medium text-neutral-400"><%= req.translations.avgSessionDuration || 'Avg. Session Duration' %></dt>
+                   <dd class="mt-1 text-2xl font-semibold text-white" id="avgSessionDuration">0s</dd>
+                 </div>
+                 <div class="p-4 rounded-lg bg-neutral-700/10">
+                   <dt class="text-xs font-medium text-neutral-400"><%= req.translations.newVisitors || 'New Visitors' %></dt>
+                   <dd class="mt-1 text-2xl font-semibold text-white" id="newVisitors">0</dd>
+                 </div>
+                 <div class="p-4 rounded-lg bg-neutral-700/10">
+                   <dt class="text-xs font-medium text-neutral-400"><%= req.translations.returningVisitors || 'Returning Visitors' %></dt>
+                   <dd class="mt-1 text-2xl font-semibold text-white" id="returningVisitors">0</dd>
+                 </div>
+               </div>
+            </div>
+         </div>
+       </div>
+
+       <!-- Error State (hidden by default) -->
+       <div id="errorContainer" class="hidden px-8 mt-8">
+         <div class="rounded-lg bg-red-900/20 border border-red-700/50 p-6 text-center">
+           <svg class="mx-auto h-12 w-12 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+           </svg>
+           <h3 class="mt-2 text-lg font-medium text-white"><%= req.translations.errorLoadingData || 'Error loading analytics data' %></h3>
+           <p class="mt-1 text-sm text-red-200" id="errorMessage"></p>
+           <div class="mt-6">
+             <button id="retryButton" type="button" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors duration-200">
+               <%= req.translations.retry || 'Retry' %>
+             </button>
+           </div>
+         </div>
+       </div>
+    </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment"></script>
+<script>
+// Global variables to store chart instances
+let trafficChartInstance = null;
+let topPagesChartInstance = null;
+
+// Function to format numbers
+function formatNumber(num) {
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(1) + 'M';
+  }
+  if (num >= 1000) {
+    return (num / 1000).toFixed(1) + 'K';
+  }
+  return num.toString();
+}
+
+// Function to format time
+function formatTime(seconds) {
+  if (seconds < 60) {
+    return seconds + 's';
+  }
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = seconds % 60;
+  return minutes + 'm ' + (remainingSeconds < 10 ? '0' : '') + remainingSeconds + 's';
+}
+
+// Function to fetch analytics data
+async function fetchAnalyticsData(timeRange = '7d') {
+  try {
+    // Show loading state
+    document.getElementById('loadingIndicator').classList.remove('hidden');
+    document.getElementById('dataContainer').classList.add('hidden');
+    document.getElementById('errorContainer').classList.add('hidden');
+
+    const response = await fetch(`/api/analytics?range=${timeRange}`);
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Update summary statistics
+    document.getElementById('totalRequests').textContent = formatNumber(data.totalRequests);
+    document.getElementById('uniqueVisitors').textContent = formatNumber(data.uniqueVisitors);
+    document.getElementById('avgRequestsPerHour').textContent = data.avgRequestsPerHour.toFixed(1);
+    document.getElementById('topPage').textContent = data.topPage.name || data.topPage;
+    document.getElementById('topPageViews').textContent = `${formatNumber(data.topPage.views || 0)} views`;
+
+    // Update additional metrics if available
+    if (data.bounceRate) {
+      document.getElementById('bounceRate').textContent = `${data.bounceRate.toFixed(1)}%`;
+    }
+    if (data.avgSessionDuration) {
+      document.getElementById('avgSessionDuration').textContent = formatTime(data.avgSessionDuration);
+    }
+    if (data.newVisitors) {
+      document.getElementById('newVisitors').textContent = formatNumber(data.newVisitors);
+    }
+    if (data.returningVisitors) {
+      document.getElementById('returningVisitors').textContent = formatNumber(data.returningVisitors);
+    }
+
+    // Update change indicators if comparison data is available
+    if (data.comparison) {
+      updateChangeIndicator('totalRequests', data.comparison.totalRequestsChange);
+      updateChangeIndicator('uniqueVisitors', data.comparison.uniqueVisitorsChange);
+      updateChangeIndicator('avgRequestsPerHour', data.comparison.avgRequestsPerHourChange);
+    }
+
+    // Create or update charts
+    updateTrafficChart(data.trafficOverTime);
+    updateTopPagesChart(data.topPages);
+
+    // Hide loading and show data
+    document.getElementById('loadingIndicator').classList.add('hidden');
+    document.getElementById('dataContainer').classList.remove('hidden');
+
+  } catch (error) {
+    console.error('Error fetching analytics data:', error);
+
+    // Show error state
+    document.getElementById('loadingIndicator').classList.add('hidden');
+    document.getElementById('errorMessage').textContent = error.message || 'Failed to load analytics data. Please try again.';
+    document.getElementById('errorContainer').classList.remove('hidden');
+  }
+}
+
+// Function to update change indicators
+function updateChangeIndicator(elementId, change) {
+  if (!change) return;
+
+  const element = document.getElementById(`${elementId}Change`);
+  const valueElement = document.getElementById(`${elementId}ChangeValue`);
+
+  if (!element || !valueElement) return;
+
+  const isPositive = change >= 0;
+  const changeValue = Math.abs(change).toFixed(1);
+
+  valueElement.textContent = `${isPositive ? '+' : ''}${changeValue}%`;
+
+  // Update colors based on positive/negative change
+  element.classList.remove('text-green-400', 'text-red-400');
+  element.classList.add(isPositive ? 'text-green-400' : 'text-red-400');
+
+  // Update icon
+  const icon = element.querySelector('svg');
+  if (icon) {
+    icon.innerHTML = isPositive ? 
+      '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"></path>' :
+      '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>';
+  }
+
+  element.classList.remove('hidden');
+}
+
+// Function to update traffic chart
+function updateTrafficChart(data) {
+  const ctx = document.getElementById('trafficChart').getContext('2d');
+
+  // Destroy previous chart instance if it exists
+  if (trafficChartInstance) {
+    trafficChartInstance.destroy();
+  }
+
+  trafficChartInstance = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: data.labels,
+      datasets: [{
+        label: '<%= req.translations.requests || "Requests" %>',
+        data: data.data,
+        borderColor: 'rgba(99, 102, 241, 1)', // Indigo
+        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+        borderWidth: 2,
+        tension: 0.3,
+        fill: true,
+        pointBackgroundColor: 'rgba(255, 255, 255, 1)',
+        pointBorderColor: 'rgba(99, 102, 241, 1)',
+        pointRadius: 3,
+        pointHoverRadius: 5
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            color: 'rgba(200, 200, 200, 1)',
+            font: {
+              size: 12
+            },
+            padding: 20
+          }
+        },
+        tooltip: {
+          mode: 'index',
+          intersect: false,
+          backgroundColor: 'rgba(30, 30, 30, 0.9)',
+          titleColor: 'rgba(200, 200, 200, 1)',
+          bodyColor: 'rgba(200, 200, 200, 1)',
+          borderColor: 'rgba(70, 70, 70, 1)',
+          borderWidth: 1,
+          padding: 12,
+          callbacks: {
+            label: function(context) {
+              return `${context.dataset.label}: ${formatNumber(context.raw)}`;
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(70, 70, 70, 0.2)',
+            drawBorder: false
+          },
+          ticks: {
+            color: 'rgba(200, 200, 200, 0.7)',
+            callback: function(value) {
+              return formatNumber(value);
+            }
+          }
+        },
+        x: {
+          grid: {
+            display: false,
+            drawBorder: false
+          },
+          ticks: {
+            color: 'rgba(200, 200, 200, 0.7)'
+          }
+        }
+      },
+      interaction: {
+        mode: 'nearest',
+        axis: 'x',
+        intersect: false
+      }
+    }
+  });
+}
+
+// Function to update top pages chart
+function updateTopPagesChart(data) {
+  const ctx = document.getElementById('topPagesChart').getContext('2d');
+
+  // Destroy previous chart instance if it exists
+  if (topPagesChartInstance) {
+    topPagesChartInstance.destroy();
+  }
+
+  // Update top pages count display
+  document.getElementById('topPagesCount').textContent = `Top ${data.labels.length}`;
+
+  topPagesChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: data.labels,
+      datasets: [{
+        label: '<%= req.translations.pageViews || "Page Views" %>',
+        data: data.data,
+        backgroundColor: [
+          'rgba(99, 102, 241, 0.7)',
+          'rgba(79, 70, 229, 0.7)',
+          'rgba(67, 56, 202, 0.7)',
+          'rgba(55, 48, 163, 0.7)',
+          'rgba(49, 46, 129, 0.7)'
+        ],
+        borderColor: [
+          'rgba(99, 102, 241, 1)',
+          'rgba(79, 70, 229, 1)',
+          'rgba(67, 56, 202, 1)',
+          'rgba(55, 48, 163, 1)',
+          'rgba(49, 46, 129, 1)'
+        ],
+        borderWidth: 1,
+        borderRadius: 4
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      indexAxis: 'y',
+      plugins: {
+        legend: {
+          display: false
+        },
+        tooltip: {
+          backgroundColor: 'rgba(30, 30, 30, 0.9)',
+          titleColor: 'rgba(200, 200, 200, 1)',
+          bodyColor: 'rgba(200, 200, 200, 1)',
+          borderColor: 'rgba(70, 70, 70, 1)',
+          borderWidth: 1,
+          padding: 12,
+          callbacks: {
+            label: function(context) {
+              return `${context.raw} views`;
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          beginAtZero: true,
+          grid: {
+            color: 'rgba(70, 70, 70, 0.2)',
+            drawBorder: false
+          },
+          ticks: {
+            color: 'rgba(200, 200, 200, 0.7)',
+            callback: function(value) {
+              return formatNumber(value);
+            }
+          }
+        },
+        y: {
+          grid: {
+            display: false,
+            drawBorder: false
+          },
+          ticks: {
+            color: 'rgba(200, 200, 200, 0.7)'
+          }
+        }
+      }
+    }
+  });
+}
+
+// Function to change chart type
+function changeChartType(type) {
+  if (!trafficChartInstance) return;
+
+  trafficChartInstance.config.type = type;
+  trafficChartInstance.update();
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+  // Initial load
+  fetchAnalyticsData();
+
+  // Time range selector
+  document.getElementById('timeRange').addEventListener('change', function() {
+    fetchAnalyticsData(this.value);
+  });
+
+  // Chart type buttons
+  document.querySelectorAll('[data-chart-type]').forEach(button => {
+    button.addEventListener('click', function() {
+      changeChartType(this.dataset.chartType);
+
+      // Update active button style
+      document.querySelectorAll('[data-chart-type]').forEach(btn => {
+        btn.classList.remove('bg-indigo-600', 'text-white');
+        btn.classList.add('bg-neutral-700/50', 'text-neutral-300');
+      });
+
+      this.classList.remove('bg-neutral-700/50', 'text-neutral-300');
+      this.classList.add('bg-indigo-600', 'text-white');
+    });
+  });
+
+  // Retry button
+  document.getElementById('retryButton').addEventListener('click', function() {
+    const timeRange = document.getElementById('timeRange').value;
+    fetchAnalyticsData(timeRange);
+  });
+});
+
+// Resize observer to handle chart resizing
+const resizeObserver = new ResizeObserver(entries => {
+  if (trafficChartInstance) {
+    trafficChartInstance.resize();
+  }
+  if (topPagesChartInstance) {
+    topPagesChartInstance.resize();
+  }
+});
+
+// Observe the chart containers
+const chartContainers = document.querySelectorAll('.overflow-hidden.rounded-lg');
+chartContainers.forEach(container => {
+  resizeObserver.observe(container);
+});
+</script>
+
+<%- include('../components/head') %>

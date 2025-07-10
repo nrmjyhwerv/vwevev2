@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Not Found | <%= name %></title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: '#f0f9ff',
+              100: '#e0f2fe',
+              200: '#bae6fd',
+              300: '#7dd3fc',
+              400: '#38bdf8',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              800: '#075985',
+              900: '#0c4a6e',
+            }
+          },
+          fontFamily: {
+            sans: ['IBM Plex Sans', 'sans-serif'],
+          },
+          animation: {
+            'float': 'float 3s ease-in-out infinite',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-10px)' },
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap" rel="stylesheet">
+  <meta name="description" content="The page you're looking for doesn't exist. Return to <%= name %>.">
+  <meta name="robots" content="noindex, nofollow">
+</head>
+<body class="h-full bg-gradient-to-br from-gray-900 to-gray-800">
+  <div class="flex flex-col items-center justify-center min-h-screen px-4 py-12 sm:px-6 lg:px-8">
+    <div class="w-full max-w-md space-y-8 text-center">
+      <!-- Animated 404 graphic -->
+      <div class="relative">
+        <svg class="w-48 h-48 mx-auto animation-float text-primary-500 opacity-80" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div class="absolute inset-0 flex items-center justify-center">
+          <span class="text-6xl font-bold text-white">404</span>
+        </div>
+      </div>
+      
+      <div class="space-y-4">
+        <h1 class="text-3xl font-extrabold tracking-tight text-white sm:text-4xl md:text-5xl">
+          Lost in Space?
+        </h1>
+        
+        <p class="text-lg text-gray-400">
+          The page you're looking for doesn't exist or has been moved.
+        </p>
+        
+        <div class="pt-6">
+          <a href="../" class="relative inline-flex items-center justify-center px-6 py-3 text-base font-medium text-white transition-all duration-200 bg-primary-600 border border-transparent rounded-xl hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 focus:ring-offset-gray-900">
+            <span class="mr-2">←</span> Return to <%= name %>
+          </a>
+        </div>
+        
+        <div class="pt-8">
+          <p class="text-sm text-gray-500">
+            Need help? <a href="#" class="font-medium text-primary-400 hover:text-primary-300">Contact support</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
