@@ -46,6 +46,34 @@ function errorResponse(res, status, message, error = null) {
 }
 
 // Users endpoints
+// DELETE user by userId
+router.delete('/api/users/:userId', validateApiKey, async (req, res) => {
+    try {
+        const userId = req.params.userId;
+
+        // Fetch users
+        const users = await db.get('users') || [];
+
+        // Find user index
+        const userIndex = users.findIndex(user => user.userId === userId);
+
+        if (userIndex === -1) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        // Remove the user
+        users.splice(userIndex, 1);
+        await db.set('users', users);
+
+        // Optionally log this action:
+        // logAudit(req.user?.userId || 'system', 'delete-user', userId, req.ip);
+
+        res.status(200).json({ message: 'User deleted successfully', userId });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: 'Failed to delete user' });
+    }
+});
 router.get('/api/users', validateApiKey, async (req, res) => {
     try {
         const users = await db.get('users') || [];
