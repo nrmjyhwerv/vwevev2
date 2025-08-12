@@ -227,14 +227,11 @@ app.set("views", [path.join(__dirname, "views"), ...PluginViewsDir]);
 init();
 
 console.log(chalk.gray(ascii) + chalk.white(`version v${config.version}\n`));
-/*
+
 app.listen(config.port, () =>
   log.info(`CryptalisPanel is listening on port ${config.port}`),
 );
-*/
-app.listen(config.port, '127.0.0.1', () => {
-  log.info(`CryptalisPanel is listening on port http://localhost:${config.port}`);
-});
+
 
 
 
